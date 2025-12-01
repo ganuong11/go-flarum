@@ -31,7 +31,7 @@ type User struct {
 	About    string `json:"about"`
 	Hidden   bool   `json:"hidden"`
 	Session  string `json:"session"`
-	Admin    bool   `json:"admin"` // 是否为管理员
+	Admin    bool   `json:"admin"` // Whether it is an administrator
 	Token    string `json:"token"`
 
 	Description string
@@ -46,17 +46,17 @@ var DefaultPreference = flarum.Preferences{
 	Locale: "en",
 }
 
-// toKey 作为Redis中的key值存储
+// toKey stored as key value in Redis
 func (user *User) toKey() string {
 	return fmt.Sprintf("%d", user.ID)
 }
 
-// StrID 返回string类型的ID值
+// StrID returns ID value of string type
 func (user *User) StrID() string {
 	return fmt.Sprintf("%d", user.ID)
 }
 
-// IsValid 当前用户是否有效
+// IsValid whether the current user is valid
 func (user *User) IsValid() bool {
 	return user.ID != 0
 }
@@ -69,8 +69,8 @@ func (user *User) CreateFlarumUser(gormDB *gorm.DB) error {
 // 	return gormDB.Create(tag).Error
 // }
 
-// SQLUserGet 获取用户
-// 当你不确定用户传来的是用户名还是用户id时, 可以调用该函数获取用户
+// SQLUserGet get user
+// When you are not sure whether the user passed is a username or user id, you can call this function to get the user
 func SQLUserGet(gormDB *gorm.DB, _userID string) (User, error) {
 	var err error
 	var user User
@@ -78,7 +78,7 @@ func SQLUserGet(gormDB *gorm.DB, _userID string) (User, error) {
 	logger := util.GetLogger()
 
 	for {
-		// 如果通过用户名可以获取到用户, 那么马上退出并返回
+		// If the user can be obtained through the username, then exit immediately and return
 		if user, err = SQLUserGetByName(gormDB, _userID); err == nil {
 			break
 		}
@@ -96,20 +96,20 @@ func SQLUserGet(gormDB *gorm.DB, _userID string) (User, error) {
 	return user, err
 }
 
-// SQLUserGetByID 获取数据库用户
+// SQLUserGetByID get database user
 func SQLUserGetByID(gormDB *gorm.DB, uid uint64) (User, error) {
 	user := User{}
 	result := gormDB.First(&user, uid)
 	return user, result.Error
 }
 
-// SQLUserGetByName 获取数据库中用户
+// SQLUserGetByName get user in database
 func SQLUserGetByName(gormDB *gorm.DB, name string) (user User, err error) {
 	err = gormDB.Where("name = ?", name).First(&user).Error
 	return
 }
 
-// SQLUserGetByEmail 获取数据库中用户
+// SQLUserGetByEmail get user in database
 func SQLUserGetByEmail(gormDB *gorm.DB, email string) (User, error) {
 	user := User{}
 	result := gormDB.Where("email = ?", email).First(&user)
@@ -128,7 +128,7 @@ func SQLUserRegister(gormDB *gorm.DB, name, email, password string) (User, error
 	result := gormDB.Create(&user)
 	if result.Error != nil {
 		if result.Error.Error() == fmt.Sprintf("Error 1062: Duplicate entry '%s' for key 'idx_name'", name) {
-			return User{}, fmt.Errorf("用户名已经存在")
+			return User{}, fmt.Errorf("username already exists")
 		}
 		return User{}, result.Error
 	}
@@ -136,7 +136,7 @@ func SQLUserRegister(gormDB *gorm.DB, name, email, password string) (User, error
 	return user, nil
 }
 
-// SQLGithubSync github用户同步信息
+// SQLGithubSync github user sync information
 func (user *User) SQLGithubSync(gormDB *gorm.DB, gu *github.User) {
 	logger := util.GetLogger()
 	if user.Email != gu.GetEmail() {
@@ -159,7 +159,7 @@ func (user *User) SQLGithubSync(gormDB *gorm.DB, gu *github.User) {
 	user.SetPreference(gormDB, DefaultPreference)
 }
 
-// SQLGithubRegister github用户注册
+// SQLGithubRegister github user registration
 func SQLGithubRegister(gormDB *gorm.DB, gu *github.User) (User, error) {
 	user := User{
 		Name:        gu.GetLogin(),
@@ -181,22 +181,22 @@ func SQLGithubRegister(gormDB *gorm.DB, gu *github.User) (User, error) {
 	return user, nil
 }
 
-// IsForbid 检查当前用户是否被禁用
+// IsForbid check whether the current user is disabled
 func (user *User) IsForbid() bool {
 	return false
 }
 
-// CanReply 检查当前用户是否可以回复帖子
+// CanReply check whether the current user can reply to posts
 func (user *User) CanReply() bool {
 	return !user.IsForbid()
 }
 
-// CanCreateTopic 检查当前用户是否可以创建帖子
+// CanCreateTopic check whether the current user can create posts
 func (user *User) CanCreateTopic() bool {
 	return !user.IsForbid()
 }
 
-// IsAdmin 检查当前用户是否为管理员
+// IsAdmin check whether the current user is an administrator
 func (user *User) IsAdmin() bool {
 	if user == nil {
 		return false
@@ -204,7 +204,7 @@ func (user *User) IsAdmin() bool {
 	return user.Admin
 }
 
-// CanEdit 检查当前用户是否可以编辑帖子
+// CanEdit check whether the current user can edit posts
 func (user *User) CanEdit(topic *Topic) bool {
 	if user == nil {
 		return false
@@ -215,7 +215,7 @@ func (user *User) CanEdit(topic *Topic) bool {
 	return user.IsAdmin() || user.ID == topic.UserID
 }
 
-// SaveAvatar 更新用户头像
+// SaveAvatar update user avatar
 // func (user *User) SaveAvatar(redisDB *redis.Client, avatar string) {
 // 	logger := util.GetLogger()
 
@@ -231,7 +231,7 @@ func (user *User) CanEdit(topic *Topic) bool {
 // 	logger.Notice("Refresh user avatar", user)
 // }
 
-// GetAvatarByID 获取用户头像
+// GetAvatarByID get user avatar
 func GetAvatarByID(gormDB *gorm.DB, redisDB *redis.Client, uid uint64) string {
 	var avatar string
 	logger := util.GetLogger()
@@ -242,7 +242,7 @@ func GetAvatarByID(gormDB *gorm.DB, redisDB *redis.Client, uid uint64) string {
 	}
 
 	user, err := SQLUserGetByID(gormDB, uid)
-	if util.CheckError(err, "查询用户") {
+	if util.CheckError(err, "Query user") {
 		return avatar
 	}
 	avatar = user.Avatar
@@ -252,7 +252,7 @@ func GetAvatarByID(gormDB *gorm.DB, redisDB *redis.Client, uid uint64) string {
 	return avatar
 }
 
-// GetUserNameByID 获取用户名称
+// GetUserNameByID get user name
 func GetUserNameByID(gormDB *gorm.DB, redisDB *redis.Client, uid uint64) string {
 	var username string
 	logger := util.GetLogger()
@@ -263,7 +263,7 @@ func GetUserNameByID(gormDB *gorm.DB, redisDB *redis.Client, uid uint64) string 
 	}
 
 	user, err := SQLUserGetByID(gormDB, uid)
-	if util.CheckError(err, "查询用户") {
+	if util.CheckError(err, "Query user") {
 		return username
 	}
 	username = user.Name
@@ -273,8 +273,8 @@ func GetUserNameByID(gormDB *gorm.DB, redisDB *redis.Client, uid uint64) string 
 	return username
 }
 
-// SetPreference 更新用户配置信息
-// 数据库中使用了blob的数据类型, 查看数据时, 需要进行转换:
+// SetPreference update user configuration information
+// The database uses blob data type, when viewing data, need to convert:
 //
 //	SELECT CONVERT(`preferences` USING utf8) FROM `user`;
 func (user *User) SetPreference(gormDB *gorm.DB, preference flarum.Preferences) {
@@ -296,14 +296,14 @@ func (user *User) SetPreference(gormDB *gorm.DB, preference flarum.Preferences) 
 	}
 }
 
-// RefreshCSRF 刷新CSRF token
+// RefreshCSRF refresh CSRF token
 func (user *User) RefreshCSRF(redisDB *redis.Client) string {
 	t := util.GetNewToken()
 	redisDB.HSet("csrf", user.toKey(), t)
 	return t
 }
 
-// VerifyCSRFToken 确认用户CSRF token
+// VerifyCSRFToken confirm user CSRF token
 func (user *User) VerifyCSRFToken(redisDB *redis.Client, token string) bool {
 	rep, err := redisDB.HGet("csrf", user.toKey()).Result()
 	if err != nil {
@@ -313,7 +313,7 @@ func (user *User) VerifyCSRFToken(redisDB *redis.Client, token string) bool {
 	return util.VerifyToken(token, rep)
 }
 
-// RefreshCache 刷新当前用户的信息
+// RefreshCache refresh current user information
 func (user *User) RefreshCache(redisDB *redis.Client) {
 	user.CleareRedisCache(redisDB)
 	user.CachedToRedis(redisDB)
@@ -321,17 +321,17 @@ func (user *User) RefreshCache(redisDB *redis.Client) {
 	redisDB.HDel("username", user.toKey())
 }
 
-// CachedToRedis 缓存当前用户的信息至Redis
+// CachedToRedis cache current user information to Redis
 func (user *User) CachedToRedis(redisDB *redis.Client) error {
 	return rSet(redisDB, "user", user.StrID(), user)
 }
 
-// CleareRedisCache 缓存当前用户的信息至Redis
+// CleareRedisCache cache current user information to Redis
 func (user *User) CleareRedisCache(redisDB *redis.Client) error {
 	return rDel(redisDB, "user", user.StrID())
 }
 
-// RedisGetUserByID 从Redis中获取缓存的用户
+// RedisGetUserByID get cached user from Redis
 func RedisGetUserByID(redisDB *redis.Client, uid string) (User, error) {
 	user := User{}
 	err := rGet(redisDB, "user", uid, &user)

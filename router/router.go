@@ -79,7 +79,7 @@ func NewFlarumAdminRouter(app *system.Application, sp *goji.Mux) *goji.Mux {
 	app.Logger.Notice("Init flarum admin router")
 
 	// https://flarum.corvo.fun/admin#/basics
-	// 管理员页面使用的是不同的路由导向的, 在goji中, 它们都会到/admin这个路径
+	// The admin page uses different routing directions, in goji, they all go to the /admin path
 	sp.HandleFunc(pat.Get(model.FlarumAdminPath), ct.MiddlewareArrayToChains(
 		[]ct.HTTPMiddleWareFunc{
 			ct.MustAuthMiddleware,
@@ -91,7 +91,7 @@ func NewFlarumAdminRouter(app *system.Application, sp *goji.Mux) *goji.Mux {
 
 	extAPISP := goji.SubMux()
 	sp.Handle(pat.New(model.FlarumExtensionAPI+"/*"), extAPISP)
-	// 修改扩展的配置调用类似如下的api
+	// Modifying extension configuration calls api similar to the following
 	// https://flarum.corvo.fun/api/extensions/flarum-mentions
 
 	// adminSP.HandleFunc(pat.Get("/"), ct.MiddlewareArrayToChains(
@@ -105,7 +105,7 @@ func NewFlarumAdminRouter(app *system.Application, sp *goji.Mux) *goji.Mux {
 	return extAPISP
 }
 
-// NewFlarumRouter flarum的router
+// NewFlarumRouter flarum router
 func NewFlarumRouter(app *system.Application, sp *goji.Mux) *goji.Mux {
 	app.Logger.Notice("Init flarum router")
 	h := ct.BaseHandler{App: app}
@@ -130,12 +130,12 @@ func NewFlarumRouter(app *system.Application, sp *goji.Mux) *goji.Mux {
 	// robots.txt
 	sp.HandleFunc(pat.Get("/robots.txt"), h.Robots)
 
-	// 用户相关
+	// User related
 	sp.HandleFunc(pat.Post("/register"), ct.FlarumUserRegister)
 	sp.HandleFunc(pat.Post("/login"), ct.FlarumUserLogin)
 	sp.HandleFunc(pat.Get("/logout"), ct.FlarumUserLogout)
 
-	// 语言包支持
+	// Language pack support
 	sp.HandleFunc(pat.Get("/locale/:locale/flarum-lang.js"), h.GetLocaleData)
 	sp.HandleFunc(pat.Get("/locale/:locale/admin-lang.js"), h.GetLocaleData)
 
@@ -149,7 +149,7 @@ func NewFlarumRouter(app *system.Application, sp *goji.Mux) *goji.Mux {
 
 	// user
 	sp.HandleFunc(pat.Get("/u/:username"), ct.FlarumUserPage)
-	// 获取用户的设置 GET请求
+	// Get user settings GET request
 	sp.HandleFunc(pat.Get("/settings"), ct.MustAuthMiddleware(ct.FlarumUserSettings))
 
 	NewFlarumAPIRouter(app, sp)
@@ -169,14 +169,14 @@ func NewFlarumAPIRouter(app *system.Application, apiSP *goji.Mux) *goji.Mux {
 	))
 
 	// API handler
-	// 获取全部的帖子信息
+	// Get all post information
 	apiSP.HandleFunc(pat.Get("/discussions"), ct.FlarumAPIDiscussions)
 
-	// 获取某个帖子的详细信息 GET请求
+	// Get detailed information of a certain post GET request
 	apiSP.HandleFunc(pat.Get("/discussions/:aid"), ct.FlarumDiscussionDetail)
 
-	// 获取帖子的详细信息, POST请求
-	// 与上面不同的是, 这里的请求中可能携带有当前登录用户阅读到的位置, 将其进行记录
+	// Get detailed information of the post, POST request
+	// Different from above, the request here may carry the position where the current logged-in user has read, and record it
 	apiSP.HandleFunc(pat.Post("/discussions/:aid"), ct.MiddlewareArrayToChains(
 		[]ct.HTTPMiddleWareFunc{
 			ct.MustAuthMiddleware,

@@ -1,6 +1,6 @@
 package flarum
 
-// Tag flarum tag信息
+// Tag flarum tag information
 type Tag struct {
 	BaseResources
 
@@ -22,31 +22,31 @@ type Tag struct {
 	IsRestricted       bool        `json:"isRestricted"`
 }
 
-// TagChildRelations 标签具有的关系
-// 子节点需要携带父节点的信息
+// TagChildRelations Relationships that the tag has
+// Child nodes need to carry parent node information
 type TagChildRelations struct {
 	LastPostedDiscussion RelationDict `json:"lastPostedDiscussion"`
 	Parent               RelationDict `json:"parent"`
 }
 
-// TagRelations 标签具有的关系
+// TagRelations Relationships that the tag has
 type TagRelations struct {
 	LastPostedDiscussion RelationDict   `json:"lastPostedDiscussion"`
 	Children             []RelationDict `json:"children"`
 }
 
-// DoInit 初始化tags
+// DoInit Initialize tags
 func (t *Tag) DoInit(id uint64) {
 	t.setID(id)
 	t.setType("tags")
 }
 
-// GetType 获取类型
+// GetType Get type
 func (t *Tag) GetType() string {
 	return t.Type
 }
 
-// // GetAttributes 获取属性
+// // GetAttributes Get attributes
 // func (t *Tag) GetAttributes() map[string]interface{} {
 // 	return nil
 // }

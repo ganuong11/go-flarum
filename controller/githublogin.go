@@ -19,7 +19,7 @@ var (
 	oauthStateString = "pseudo-random"
 )
 
-// GithubOauth github验证
+// GithubOauth GitHub verification
 func githubOauth(clientID, clientSecret string) *oauth2.Config {
 	conf := &oauth2.Config{
 		ClientID:     clientID,
@@ -31,7 +31,7 @@ func githubOauth(clientID, clientSecret string) *oauth2.Config {
 
 }
 
-// GithubOauthHandler github用户登录
+// GithubOauthHandler GitHub user login
 func GithubOauthHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := GetRetContext(r)
 	h := ctx.h
@@ -43,7 +43,7 @@ func GithubOauthHandler(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// GithubOauthCallbackHandler github用户登录回调
+// GithubOauthCallbackHandler GitHub user login callback
 func GithubOauthCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	ctx := GetRetContext(r)
 	h := ctx.h
@@ -63,7 +63,7 @@ func GithubOauthCallbackHandler(w http.ResponseWriter, r *http.Request) {
 	result := gormDB.Where("email = ?", data.GetEmail()).First(&uobj)
 	if result.Error != nil {
 		if errors.Is(result.Error, gorm.ErrRecordNotFound) {
-			// 无法找到用户
+			// Unable to find user
 			uobj, err = model.SQLGithubRegister(gormDB, data)
 		}
 		if err != nil {

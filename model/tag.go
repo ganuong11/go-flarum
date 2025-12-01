@@ -4,7 +4,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// Tag 帖子分类
+// Tag Post category
 type Tag struct {
 	gorm.Model
 	ID   uint64 `gorm:"primaryKey"`

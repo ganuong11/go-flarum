@@ -11,7 +11,7 @@ import (
 )
 
 type (
-	// Reply 会在数据库中保存的信息
+	// Reply Information that will be saved in the database
 	Reply struct {
 		gorm.Model
 		ID       uint64 `gorm:"primaryKey"`
@@ -29,16 +29,16 @@ type (
 		ReplyID uint64 `gorm:"column:reply_id;index"`
 	}
 
-	// Comment 评论信息
+	// Comment Comment information
 	Comment struct {
 		Reply
 		Avatar     string `json:"avatar"`
 		ContentFmt template.HTML
-		Likes      []uint64 // 点赞的用户
+		Likes      []uint64 // Users who liked
 	}
 )
 
-// PreProcessUserMention 预处理用户的引用
+// PreProcessUserMention Preprocess user mentions
 // #14
 func PreProcessUserMention(gormDB *gorm.DB, redisDB *redis.Client, tz int, userComment string) string {
 	logger := util.GetLogger()
@@ -84,7 +84,7 @@ func (cb *Reply) toComment(gormDB *gorm.DB, redisDB *redis.Client, tz int) Comme
 		Likes: cb.getUserLikes(gormDB, redisDB),
 	}
 
-	// 预防XSS漏洞
+	// Prevent XSS vulnerabilities
 	c.ContentFmt = template.HTML(ContentFmt(cb.Content))
 	c.Avatar = GetAvatarByID(gormDB, redisDB, cb.UID)
 	return c
@@ -124,35 +124,35 @@ func sqlCommentListByUserID(gormDB *gorm.DB, redisDB *redis.Client, userID uint6
 	return
 }
 
-// SQLCommentByID 获取一条评论
+// SQLCommentByID Get one comment
 func SQLCommentByID(gormDB *gorm.DB, redisDB *redis.Client, cid uint64, tz int) (Comment, error) {
 	var c Reply
 	err := gormDB.First(&c, cid).Error
 	return c.toComment(gormDB, redisDB, tz), err
 }
 
-// SQLCommentListByCID 获取某条评论
+// SQLCommentListByCID Get a certain comment
 func SQLCommentListByCID(gormDB *gorm.DB, redisDB *redis.Client, commentID uint64, limit uint64, tz int) ([]Comment, error) {
 	comment, err := SQLCommentByID(gormDB, redisDB, commentID, tz)
 	return []Comment{comment}, err
 }
 
-// SQLCommentListByList 获取某条评论
+// SQLCommentListByList Get a certain comment
 func SQLCommentListByList(gormDB *gorm.DB, redisDB *redis.Client, commentList []uint64, tz int) ([]Comment, error) {
 	return sqlGetRepliesBaseByList(gormDB, redisDB, commentList, tz)
 }
 
-// SQLCommentListByTopic 获取帖子的所有评论
+// SQLCommentListByTopic Get all comments of the post
 func SQLCommentListByTopic(gormDB *gorm.DB, redisDB *redis.Client, topicID uint64, limit uint64, tz int) ([]Comment, error) {
 	return sqlCommentListByTopicID(gormDB, redisDB, topicID, limit, tz)
 }
 
-// SQLCommentListByUser 获取某个用户的帖子信息
+// SQLCommentListByUser Get post information of a certain user
 func SQLCommentListByUser(gormDB *gorm.DB, redisDB *redis.Client, userID uint64, limit uint64, tz int) ([]Comment, error) {
 	return sqlCommentListByUserID(gormDB, redisDB, userID, limit, tz)
 }
 
-// CreateFlarumComment 创建flarum的评论
+// CreateFlarumComment Create flarum comment
 func (comment *Comment) CreateFlarumComment(gormDB *gorm.DB) (bool, error) {
 	logger := util.GetLogger()
 
@@ -194,7 +194,7 @@ func (comment *Comment) CreateFlarumComment(gormDB *gorm.DB) (bool, error) {
 	return true, nil
 }
 
-// DoLike 用户的点赞
+// DoLike User's like
 func (comment *Comment) DoLike(gormDB *gorm.DB, redisDB *redis.Client, user *User, isLiked bool) {
 	if isLiked {
 		rl := ReplyLikes{UserID: user.ID, ReplyID: comment.ID}

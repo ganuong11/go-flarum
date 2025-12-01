@@ -104,11 +104,11 @@ func main() {
 		}
 	}
 
-	// 调试tags
+	// Debug tags
 	// fmt.Println(model.SQLGetTags(app.GormDB))
 	// fmt.Println(model.SQLGetTagByUrlName(app.GormDB, "r_funny"))
 
-	// 测试通过tag查找帖子
+	// Test finding posts by tag
 	// tag, err := model.SQLGetTagByUrlName(app.GormDB, "r_funny")
 	// fmt.Println(tag, err)
 	// var topics []model.Topic

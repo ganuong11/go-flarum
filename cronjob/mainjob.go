@@ -31,13 +31,13 @@ func (h *BaseHandler) MainCronJob() {
 	// tickRefreshOrder := time.Tick(3 * time.Second)
 	// daySecond := int64(3600 * 24)
 
-	// 每3小时将Redis中的数据库中的排序数据刷新
+	// Refresh the sorting data in Redis to the database every 3 hours
 	tickResortRankMap := time.Tick(3 * time.Hour)
 
-	// 每小时将点击量刷到数据库中
+	// Flush click counts to database every hour
 	tickStoreHitToMySQL := time.Tick(1 * time.Hour)
 
-	// 每十分钟刷新排序
+	// Refresh sorting every ten minutes
 	// tickRefreshOrder := time.Tick(10 * time.Minute)
 
 	logger.Info("Start cron job")
@@ -54,14 +54,14 @@ func (h *BaseHandler) MainCronJob() {
 	}
 }
 
-// refreshRankMap 刷新redis中存储的排序数据
+// refreshRankMap refresh the sorting data stored in redis
 func refreshRankMap(logger *logging.Logger) {
 	logger.Info("===== Start refresh rank map =====")
 	model.TimelyResort()
 	logger.Info("=====  End  refresh rank map =====")
 }
 
-// syncWithMySQL 将Redis中的统计数据同步给mysql
+// syncWithMySQL synchronize the statistical data in Redis to mysql
 func syncWithMySQL(logger *logging.Logger, redisDB *redis.Client) {
 	logger.Info("===== start sync hits with the mysql =====")
 	// data, _ := redisDB.HGetAll("article_views").Result()

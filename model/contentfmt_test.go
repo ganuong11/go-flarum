@@ -100,7 +100,7 @@ func TestBilibiliHTML(t *testing.T) {
 	if strings.Index(result, output) < 0 {
 		t.Error(result)
 	}
-	// 两个iframe
+	// Two iframes
 	output = `<iframe style="min-width: 200px; width: 80%; height: 460px;" allowfullscreen="allowfullscreen" frameborder="0" src="//player.bilibili.com/player.html?aid=288149957&bvid=BV1Zf4y1Y7dE&cid=268125615&page=1" sandbox="allow-top-navigation allow-same-origin allow-forms allow-popups allow-scripts"></iframe><br>` + "\n" + `<br><iframe style="min-width: 200px; width: 80%; height: 460px;" allowfullscreen="allowfullscreen" frameborder="0" src="//player.bilibili.com/player.html?aid=372300761&bvid=BV1pZ4y1576P&cid=240628593&page=1" sandbox="allow-top-navigation allow-same-origin allow-forms allow-popups allow-scripts"></iframe>`
 	str = `<iframe src="//player.bilibili.com/player.html?aid=288149957&bvid=BV1Zf4y1Y7dE&cid=268125615&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe><iframe src="//player.bilibili.com/player.html?aid=372300761&bvid=BV1pZ4y1576P&cid=240628593&page=1" scrolling="no" border="0" frameborder="no" framespacing="0" allowfullscreen="true"> </iframe>`
 	result = ContentRich(str)
@@ -135,8 +135,8 @@ func TestGistReplace(t *testing.T) {
 }
 
 func TestPostMentions(t *testing.T) {
-	output := `<p><a href="/d/939/4" class="PostMention" data-id="141">@corvofeng</a>这是对代码块评论的回复</p>`
-	str := `<POSTMENTION discussionid="939" displayname="一枚小猿" id="141" number="4" username="corvofeng">@corvofeng</POSTMENTION>这是对代码块评论的回复`
+	output := `<p><a href="/d/939/4" class="PostMention" data-id="141">@corvofeng</a>This is a reply to the code block comment</p>`
+	str := `<POSTMENTION discussionid="939" displayname="a little monkey" id="141" number="4" username="corvofeng">@corvofeng</POSTMENTION>This is a reply to the code block comment`
 	result := ContentRich(str)
 	if strings.Index(result, output) < 0 {
 		t.Error(result)

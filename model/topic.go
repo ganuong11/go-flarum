@@ -14,7 +14,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// Topic 基础的文档类, 在数据库表中的字段
+// Topic Basic document class, fields in the database table
 type Topic struct {
 	gorm.Model
 	ID     uint64 `gorm:"primaryKey"`
@@ -39,22 +39,22 @@ type Topic struct {
 	//  `gorm:"foreignKey:TopicID"`
 }
 
-// TopicTags 帖子的标签
-// 使用gorm 的many2many, 不需要单独初始化了
+// TopicTags Tags of the post
+// Using gorm's many2many, no need to initialize separately
 type TopicTag struct {
 	gorm.Model
 	TopicID uint64 `gorm:"primaryKey"`
 	TagID   uint64 `gorm:"primaryKey"`
 }
 
-// ArticleMini 缩略版的Article信息
+// ArticleMini Abbreviated Article information
 type ArticleMini struct {
 	Topic
 	Ruid   uint64 `json:"ruid"`
 	Hidden bool   `json:"hidden"`
 }
 
-// ArticleListItem data strucy only used in page.
+// ArticleListItem data structure only used in page.
 type ArticleListItem struct {
 	Topic
 	Name        string `json:"name"`
@@ -86,7 +86,7 @@ type ArticlePageInfo struct {
 	LastScore  uint64            `json:"lastscore"`
 }
 
-// FlarumArticlePageInfo flarum站点的数据信息
+// FlarumArticlePageInfo Data information of flarum site
 type FlarumArticlePageInfo struct {
 	Items     []flarum.Discussion
 	LinkFirst string
@@ -105,7 +105,7 @@ type ArticleRelative struct {
 	Tags     []string
 }
 
-// ArticleFeedListItem rss资源
+// ArticleFeedListItem rss resource
 type ArticleFeedListItem struct {
 	ID          uint64
 	UID         uint64
@@ -117,7 +117,7 @@ type ArticleFeedListItem struct {
 	Des         string
 }
 
-// ArticleTag 文章添加、编辑后传给后台任务的信息
+// ArticleTag Information passed to background task after article add/edit
 // TODO: delete
 type ArticleTag struct {
 	ID      uint64
@@ -125,7 +125,7 @@ type ArticleTag struct {
 	NewTags string
 }
 
-// SQLArticleGetByID 通过 article id获取内容
+// SQLArticleGetByID Get content by article id
 func SQLArticleGetByID(gormDB *gorm.DB, redisDB *redis.Client, aid uint64) (Topic, error) {
 	articleBaseList, err := sqlGetTopicByList(gormDB, []uint64{aid})
 	var obj Topic
@@ -145,7 +145,7 @@ func SQLGetTopicGetByTitle(gormDB *gorm.DB, title string) (Topic, error) {
 	return obj, nil
 }
 
-// GetWeight 获取当前帖子的权重
+// GetWeight Get the weight of the current post
 /**
  * (Log10(QView) * 2 + 4 * comments)/ QAge
  *
@@ -180,10 +180,10 @@ func (article *Topic) GetFormatedString() string {
 	)
 }
 
-// CreateFlarumTopic 创建flarum的帖子
-// 帖子中, category和tag是不同的数据
-// category是帖子比较大的分类, 每个帖子只能有一个
-// tag只是这个帖子具有的某种特征, 每个帖子可以有多个tag
+// CreateFlarumTopic Create flarum post
+// In posts, category and tag are different data
+// category is a larger classification of posts, each post can only have one
+// tag is just a certain feature that this post has, each post can have multiple tags
 func (topic *Topic) CreateFlarumTopic(gormDB *gorm.DB) (bool, error) {
 	logger := util.GetLogger()
 	tx := gormDB.Begin()
@@ -224,7 +224,7 @@ func (topic *Topic) CreateFlarumTopic(gormDB *gorm.DB) (bool, error) {
 	return true, nil
 }
 
-// sqlGetTopicByList 获取帖子信息, NOTE: 请尽量调用该函数, 而不是自己去写sql语句
+// sqlGetTopicByList Get post information, NOTE: Please try to call this function instead of writing sql statements yourself
 func sqlGetTopicByList(gormDB *gorm.DB, articleList []uint64) (topics []Topic, err error) {
 	err = gormDB.
 		Preload("Tags").
@@ -233,7 +233,7 @@ func sqlGetTopicByList(gormDB *gorm.DB, articleList []uint64) (topics []Topic, e
 	return
 }
 
-// tagID 为0 表示全部主题
+// tagID of 0 means all topics
 func SQLGetTopicByTag(gormDB *gorm.DB, redisDB *redis.Client, tagID, start uint64, limit uint64) (topics []Topic, err error) {
 	logger := util.GetLogger()
 	var tag Tag
@@ -287,7 +287,7 @@ func sqlGetAllArticleWithCID(cid uint64, active bool) ([]ArticleMini, error) {
 	// }
 
 	// if cid == 0 {
-	// 	// cid为0, 查询所有节点
+	// 	// cid is 0, query all nodes
 	// 	rows, err = db.Query(
 	// 		"SELECT t_list.topic_id FROM (SELECT topic_id FROM `topic_tag`) as t_list LEFT JOIN topic ON t_list.topic_id = topic.id WHERE active = ?",
 	// 		activeData)
@@ -316,7 +316,7 @@ func sqlGetAllArticleWithCID(cid uint64, active bool) ([]ArticleMini, error) {
 	return articles, nil
 }
 
-// GetArticleCntFromRedisDB 从不同的数据库中获取点击数
+// GetArticleCntFromRedisDB Get click count from different databases
 func GetArticleCntFromRedisDB(redisDB *redis.Client, aid uint64) uint64 {
 	rep := redisDB.HGet("article_views", fmt.Sprintf("%d", aid))
 	data, err := rep.Uint64()
@@ -333,8 +333,8 @@ func (topic *Topic) toKeyForComments() string {
 	return fmt.Sprintf("comments-article-%d", topic.ID)
 }
 
-// CacheCommentList 缓存当前话题对应的评论ID, 该函数可以用于进行增加或是减少
-// 注意这里是有顺序的, 顺序为发帖时间
+// CacheCommentList Cache the comment IDs corresponding to the current topic, this function can be used to add or reduce
+// Note that there is order here, the order is posting time
 func (topic *Topic) CacheCommentList(redisDB *redis.Client, comments []Comment, done chan bool) error {
 	logger := util.GetLogger()
 	logger.Debugf("Cache comment list for: %d, and %d comments", topic.ID, len(comments))
@@ -343,13 +343,13 @@ func (topic *Topic) CacheCommentList(redisDB *redis.Client, comments []Comment, 
 			Score:  float64(c.CreatedAt.Unix()),
 			Member: c.ID},
 		).Result()
-		util.CheckError(err, "更新redis中的话题的评论信息")
+		util.CheckError(err, "Update the comment information of the topic in redis")
 	}
 	done <- true
 	return nil
 }
 
-// GetCommentIDList 获取帖子已经排序好的评论列表
+// GetCommentIDList Get the sorted comment list of the post
 func (topic *Topic) GetCommentIDList(redisDB *redis.Client) (comments []uint64) {
 	rdsData, _ := rankRedisDB.ZRange(topic.toKeyForComments(), 0, -1).Result()
 	for _, _cid := range rdsData {

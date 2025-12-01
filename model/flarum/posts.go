@@ -2,7 +2,7 @@ package flarum
 
 import "html/template"
 
-// Post flarum 评论信息
+// Post flarum comment information
 type Post struct {
 	BaseResources
 
@@ -23,7 +23,7 @@ type Post struct {
 	CanApprove bool `json:"canApprove"`
 }
 
-// PostRelations 评论具有的关系
+// PostRelations Relationships that the post has
 type PostRelations struct {
 	User        RelationDict  `json:"user"`
 	Discussion  RelationDict  `json:"discussion"`
@@ -34,18 +34,18 @@ type PostRelations struct {
 	MentionsPosts RelationArray `json:"mentionsPosts"`
 }
 
-// DoInit 初始化评论数据
+// DoInit Initialize comment data
 func (p *Post) DoInit(id uint64) {
 	p.setID(id)
 	p.setType("posts")
 }
 
-// // GetType 获取类型
+// // GetType Get type
 // func (p *Post) GetType() string {
 // 	return p.Type
 // }
 
-// // GetAttributes 获取属性
+// // GetAttributes Get attributes
 // func (p *Post) GetAttributes() map[string]interface{} {
 // 	// uObj := obj.(model.User)
 // 	// fmt.Println(uObj)

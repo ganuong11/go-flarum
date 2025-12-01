@@ -22,7 +22,7 @@ func IsUserName(str string) bool {
 	if len(str) == 0 {
 		return false
 	}
-	return nicknameRegexp.MatchString(str) // 支持中文
+	return nicknameRegexp.MatchString(str) // Support Chinese
 	//return usernameRegexp.MatchString(str)
 }
 

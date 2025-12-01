@@ -9,15 +9,15 @@ import (
 	"github.com/corvofeng/go-flarum/util"
 )
 
-// FlarumCreateForumInfo 从SiteInfo创建ForumInfo
-// tags 当前站点具有的标签集合, TODO: 缓存
+// FlarumCreateForumInfo Create ForumInfo from SiteInfo
+// tags Tag collection of current site, TODO: cache
 func FlarumCreateForumInfo(
 	user *User,
 	appConf AppConf,
 	siteInfo SiteInfo,
 	tags []flarum.Resource,
 ) flarum.Resource {
-	obj := flarum.NewResource(flarum.EForum, 1) // flarum 默认为1
+	obj := flarum.NewResource(flarum.EForum, 1) // flarum defaults to 1
 	data := (obj.Attributes).(*flarum.Forum)
 
 	mainConf := appConf.Main
@@ -61,15 +61,15 @@ func FlarumCreateForumInfo(
 	return obj
 }
 
-// FlarumCreateLocale 生成语言包配置
+// FlarumCreateLocale generates language pack configuration
 func FlarumCreateLocale(coreData *flarum.CoreData, locale string) {
 	coreData.Locales = make(map[string]string)
 	coreData.Locales["en"] = "English"
-	coreData.Locales["zh"] = "中文"
+	coreData.Locales["zh"] = "Chinese"
 	coreData.Locale = locale
 }
 
-// FlarumCreateTag 创建tag资源
+// FlarumCreateTag creates tag resource
 func FlarumCreateTag(cat Tag) flarum.Resource {
 	obj := flarum.NewResource(flarum.ETAG, cat.ID)
 
@@ -106,7 +106,7 @@ func FlarumCreateTag(cat Tag) flarum.Resource {
 	return obj
 }
 
-// FlarumCreateDiscussion 创建帖子资源
+// FlarumCreateDiscussion creates discussion resource
 func FlarumCreateDiscussion(topic Topic) flarum.Resource {
 	obj := flarum.NewResource(flarum.EDiscussion, topic.ID)
 	data := obj.Attributes.(*flarum.Discussion)
@@ -196,12 +196,12 @@ func FlarumCreateFoFUploadFiles(uf UserFiles, user User) flarum.Resource {
 	return obj
 }
 
-// FlarumCreateCurrentUser 创建用户资源
+// FlarumCreateCurrentUser creates user resource
 func FlarumCreateCurrentUser(user User) flarum.Resource {
 	return FlarumCreateUser(user)
 }
 
-// FlarumCreateUser 创建用户资源
+// FlarumCreateUser creates user resource
 func FlarumCreateUser(user User) flarum.Resource {
 	obj := flarum.NewResource(flarum.ECurrentUser, user.ID)
 	data := obj.Attributes.(*flarum.CurrentUser)
@@ -233,7 +233,7 @@ func FlarumCreateUser(user User) flarum.Resource {
 	return obj
 }
 
-// FlarumCreateGroup 创建组信息
+// FlarumCreateGroup creates group information
 func FlarumCreateGroup() flarum.Resource {
 	obj := flarum.NewResource(flarum.EGroup, 1)
 	data := obj.Attributes.(*flarum.Group)
@@ -261,7 +261,7 @@ func FlarumCreateBlogMeta(blogMeta BlogMeta, currentUser *User) flarum.Resource 
 	return obj
 }
 
-// FlarumCreatePost 创建评论
+// FlarumCreatePost creates comment
 func FlarumCreatePost(comment Comment, currentUser *User) flarum.Resource {
 	obj := flarum.NewResource(flarum.EPost, comment.ID)
 	data := obj.Attributes.(*flarum.Post)
@@ -321,7 +321,7 @@ func FlarumCreatePost(comment Comment, currentUser *User) flarum.Resource {
 	return obj
 }
 
-// FlarumCreateUserLikeRelations 点赞关系
+// FlarumCreateUserLikeRelations like relationships
 func FlarumCreateUserLikeRelations(userList []uint64) flarum.RelationArray {
 	userLikes := flarum.RelationArray{
 		Data: []flarum.BaseRelation{},
@@ -335,7 +335,7 @@ func FlarumCreateUserLikeRelations(userList []uint64) flarum.RelationArray {
 	return userLikes
 }
 
-// FlarumCreatePostRelations 创建关系结构
+// FlarumCreatePostRelations creates relationship structure
 func FlarumCreatePostRelations(postArr []flarum.Resource, comments []uint64) flarum.IRelation {
 	var obj flarum.RelationArray
 	for _, p := range postArr {
@@ -357,7 +357,7 @@ func FlarumCreatePostRelations(postArr []flarum.Resource, comments []uint64) fla
 	return obj
 }
 
-// FlarumCreateTagRelations 创建关系结构
+// FlarumCreateTagRelations creates relationship structure
 func FlarumCreateTagRelations(tagArr []flarum.Resource) flarum.IRelation {
 	var obj flarum.RelationArray
 	for _, p := range tagArr {

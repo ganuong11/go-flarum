@@ -19,9 +19,9 @@ import (
 
 type replyFilter struct {
 	FT    filterType
-	AID   uint64 // 一个帖子的评论
-	CID   uint64 // 单个评论的信息
-	UID   uint64 // 某个用户创建的评论
+	AID   uint64 // Comments of a post
+	CID   uint64 // Information of a single comment
+	UID   uint64 // Comments created by a certain user
 	Page  uint64
 	Limit uint64
 	IDS   []uint64

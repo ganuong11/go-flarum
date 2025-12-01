@@ -5,7 +5,7 @@ package flarum
  *   view/flarum/src/Api/Serializer/ForumSerializer.php
  */
 
-// Forum 论坛的基础信息
+// Forum Basic information of the forum
 type Forum struct {
 	BaseResources
 
@@ -74,7 +74,7 @@ type Forum struct {
 	FofUploadComposerButtonVisiblity string `json:"fof-upload.composerButtonVisiblity"` // "both", "none", "upload", "download"
 }
 
-// ForumRelations 站点关系
+// ForumRelations Site relationships
 type ForumRelations struct {
 	Groups    RelationArray `json:"groups"`
 	Tags      RelationArray `json:"tags"`
@@ -82,18 +82,18 @@ type ForumRelations struct {
 	Reactions RelationArray `json:"reactions"`
 }
 
-// DoInit 初始化forum
+// DoInit Initialize forum
 func (f *Forum) DoInit(id uint64) {
 	f.setID(id)
 	f.Type = "forums"
 }
 
-// GetType 获取类型
+// GetType Get type
 func (f *Forum) GetType() string {
 	return f.Type
 }
 
-// // GetAttributes 获取属性
+// // GetAttributes Get attributes
 // func (f *Forum) GetAttributes() map[string]interface{} {
 // 	return nil
 // }

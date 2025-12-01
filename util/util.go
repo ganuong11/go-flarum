@@ -119,15 +119,15 @@ func b64decode(data string) []byte {
 	return decoded
 }
 
-// GetUUID 获取一个随机的uuid
+// GetUUID Get a random uuid
 func GetUUID() string {
 	id := uuid.New()
 	return id.String()
 }
 
-// GetNewToken 获取新的csrf token
+// GetNewToken Get new csrf token
 func GetNewToken() string {
-	// golang会将参数中的+替换为空格, 这里生成token时就直接替换
+	// Golang will replace + in parameters with spaces, so replace directly when generating token
 	// 	http://weakyon.com/2017/05/04/something-of-golang-url-encoding.html
 	return strings.Replace(b64encode(generateToken()), "+", "", -1)
 }

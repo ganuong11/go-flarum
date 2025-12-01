@@ -26,17 +26,17 @@ func createFlarumAdminAPIDoc(
 	currentUser := reqctx.currentUser
 	logger := reqctx.GetLogger()
 
-	// 所有分类的信息, 用于整个站点的信息
+	// Information of all categories, used for the entire site information
 	var flarumTags []flarum.Resource
 
 	if currentUser != nil {
 		user := model.FlarumCreateCurrentUser(*currentUser)
 		coreData.AddCurrentUser(user)
-		if !inAPI { // 做API请求时, 不更新csrf信息
+		if !inAPI { // When making API requests, do not update CSRF information
 			coreData.AddSessionData(user, currentUser.RefreshCSRF(redisDB))
 		}
 	}
-	// 添加当前站点信息
+	// Add current site information
 	categories, err := model.SQLGetTags(gormDB)
 	if err != nil {
 		logger.Error("Get all categories error", err)
@@ -53,7 +53,7 @@ func createFlarumAdminAPIDoc(
 	if err != nil {
 		return coreData, err
 	}
-	// 需要给出
+	// Need to provide
 	coreData.Settings.DefaultRoute = "/all"
 	coreData.Settings.FlarumMarkdownMdarea = "1"
 	coreData.Settings.FlarumMentionsAllowUsernameFormat = "1"
@@ -103,7 +103,7 @@ func createFlarumAdminAPIDoc(
 	return coreData, err
 }
 
-// ArticleHomeList 文章主页
+// ArticleHomeList Article home page
 func AdminHome(w http.ResponseWriter, r *http.Request) {
 	ctx := GetRetContext(r)
 	h := ctx.h

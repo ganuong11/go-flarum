@@ -82,7 +82,7 @@ func S3PushObject(logger *logging.Logger, user model.User, cfg model.S3ConfigCon
 		FilePath:   filePath,
 		FileSize:   fileHeader.Size,
 		FileType:   fileHeader.Header.Get("Content-Type"),
-		Visibility: "public", // 可根据需要设置为 "private"
+		Visibility: "public", // Can be set to 'private' as needed
 	}
 	return userfile, nil
 }
@@ -95,7 +95,7 @@ func LocalUploadObject(logger *logging.Logger, user model.User, uploadDir string
 	}
 	defer file.Close()
 
-	// 检查文件类型（可选）
+	// Check file type (optional)
 	ext := strings.ToLower(filepath.Ext(fileHeader.Filename))
 	if ext == "" {
 		return uf, fmt.Errorf("invalid file extension")
@@ -104,13 +104,13 @@ func LocalUploadObject(logger *logging.Logger, user model.User, uploadDir string
 	now := time.Now()
 	dateString := now.Format("2006/01/02") // Formats as YYYY/MM/DD
 
-	// 生成保存路径
+	// Generate save path
 	objectName := path.Join(
 		uploadDir,
 		dateString,
 		fmt.Sprintf("%s-%s", uuid, fileHeader.Filename),
 	)
-	// 确保目录存在
+	// Ensure directory exists
 	err = os.MkdirAll(filepath.Dir(objectName), os.ModePerm)
 	if err != nil {
 		return uf, fmt.Errorf("failed to create directory: %w", err)
@@ -135,19 +135,19 @@ func LocalUploadObject(logger *logging.Logger, user model.User, uploadDir string
 		FilePath:   "/" + objectName,
 		FileSize:   fileHeader.Size,
 		FileType:   fileHeader.Header.Get("Content-Type"),
-		Visibility: "public", // 可根据需要设置为 "private"
+		Visibility: "public", // Can be set to 'private' as needed
 	}
 
 	return userfile, nil
 }
 
-// 上传接口
+// Upload interface
 func FlarumUpload(w http.ResponseWriter, r *http.Request) {
 	ctx := GetRetContext(r)
 	h := ctx.h
 	logger := ctx.GetLogger()
 
-	// 解析表单
+	// Parse form
 	err := r.ParseMultipartForm(32 << 20) // 32MB
 	if err != nil {
 		h.flarumErrorJsonify(w, createSimpleFlarumError("Parse form error: "+err.Error()))
@@ -182,7 +182,7 @@ func FlarumUpload(w http.ResponseWriter, r *http.Request) {
 		if s3cfg.Endpoint == "" {
 			uf, err = LocalUploadObject(logger, *currentUser, uploadDir, fileHeader)
 		} else {
-			// 如果没有配置 S3，则使用本地上传
+			// If S3 is configured, use S3 upload
 			uf, err = S3PushObject(logger, *currentUser, s3cfg, fileHeader)
 		}
 		if err != nil {
@@ -200,7 +200,7 @@ func FlarumUpload(w http.ResponseWriter, r *http.Request) {
 	}
 
 	coreData := flarum.NewCoreData()
-	apiDoc := &coreData.APIDocument // 注意, 获取到的是指针
+	apiDoc := &coreData.APIDocument // Note: this gets a pointer
 
 	var res []flarum.Resource
 	for _, uf := range uploadedFiles {
@@ -212,7 +212,7 @@ func FlarumUpload(w http.ResponseWriter, r *http.Request) {
 }
 
 // http://127.0.0.1:8082/api/v1/flarum/fof/uploads?filter%5Buser%5D=2&page%5Boffset%5D=0
-// FlarumUploads 获取用户上传的文件
+// FlarumUploads gets user's uploaded files
 func FlarumUploadsAll(w http.ResponseWriter, r *http.Request) {
 	ctx := GetRetContext(r)
 	h := ctx.h
@@ -224,7 +224,7 @@ func FlarumUploadsAll(w http.ResponseWriter, r *http.Request) {
 	}
 	logger.Debugf("User %d has uploaded %d files", ctx.currentUser.ID, len(userfiles))
 	coreData := flarum.NewCoreData()
-	apiDoc := &coreData.APIDocument // 注意, 获取到的是指针
+	apiDoc := &coreData.APIDocument // Note: this gets a pointer
 	var res []flarum.Resource
 
 	for _, uf := range userfiles {

@@ -7,10 +7,10 @@ import (
 )
 
 const (
-	// FlarumAPIPath flarum 的api位置
+	// FlarumAPIPath flarum api location
 	FlarumAPIPath      = "/api/v1/flarum"
 	FlarumAdminPath    = "/admin"
-	FlarumExtensionAPI = "/api/extensions" // 用于网站管理员
+	FlarumExtensionAPI = "/api/extensions" // For website administrators
 )
 
 type S3ConfigConf struct {
@@ -24,14 +24,14 @@ type S3ConfigConf struct {
 	S3BaseURL       string
 }
 
-// MainConf 主配置
+// MainConf Main configuration
 type MainConf struct {
 	HTTPPort int
-	Domain   string // 若启用https 则该domain 为注册的域名，eg: domain.com、www.domain.com
+	Domain   string // If https is enabled, this domain is the registered domain, eg: domain.com, www.domain.com
 
 	BaseURL string
 
-	// 数据库地址
+	// Database address
 	DB          string
 	MySQLURL    string
 	PostgresURL string
@@ -43,7 +43,7 @@ type MainConf struct {
 	LocaleDir     string
 	ExtensionsDir string
 	ViewDir       string
-	UploadDir     string // 上传文件目录
+	UploadDir     string // Upload file directory
 	Debug         bool
 
 	ServerName     string
@@ -56,19 +56,19 @@ type MainConf struct {
 
 	S3Config S3ConfigConf // S3配置
 
-	// secure cookie 初始化时需要
+	// secure cookie needed during initialization
 	SCHashKey  string
 	SCBlockKey string
 }
 
-// SiteConf 站点配置
+// SiteConf Site configuration
 type SiteConf struct {
 	GoVersion  string
 	MD5Sums    string
 	Name       string
 	Desc       string
 	AdminEmail string
-	MainDomain string // 上传图片后添加网址前缀, eg: http://domian.com 、http://234.21.35.89:8082
+	MainDomain string // Add URL prefix after uploading image, eg: http://domain.com, http://234.21.35.89:8082
 
 	CDNBaseURL string // 静态文件cdn地址
 
@@ -102,23 +102,23 @@ type SiteConf struct {
 	GithubClientSecret string
 }
 
-// AppConf 应用配置文件
+// AppConf Application configuration file
 type AppConf struct {
 	Main *MainConf
 	Site *SiteConf
 }
 
-// SiteInfo 当前站点的一些集合类信息
+// SiteInfo Some collection class information of the current site
 type SiteInfo struct {
-	Days     uint64 // 创建的天数
-	UserNum  uint64 // 用户数量
-	NodeNum  uint64 // 节点数量
-	TagNum   uint64 // tag数量
-	PostNum  uint64 // 帖子数量
-	ReplyNum uint64 // 回复数量
+	Days     uint64 // Days created
+	UserNum  uint64 // Number of users
+	NodeNum  uint64 // Number of nodes
+	TagNum   uint64 // Number of tags
+	PostNum  uint64 // Number of posts
+	ReplyNum uint64 // Number of replies
 }
 
-// GetDays 获取从建站开始, 到目前的天数, 用于主页中的显示
+// GetDays Get the number of days from the site creation to now, used for display on the homepage
 func GetDays(redisDB *redis.Client) uint64 {
 
 	siteCreateTime, err := redisDB.Get("site_create_time").Uint64()
@@ -130,7 +130,7 @@ func GetDays(redisDB *redis.Client) uint64 {
 	return uint64(diff.Hours()/24) + 1
 }
 
-// GetSiteInfo 直接获取网站信息
+// GetSiteInfo Directly get website information
 func GetSiteInfo(redisDB *redis.Client) SiteInfo {
 	si := SiteInfo{}
 	si.Days = GetDays(redisDB)

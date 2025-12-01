@@ -1,6 +1,6 @@
 package flarum
 
-// Group group信息
+// Group group information
 type Group struct {
 	BaseResources
 
@@ -13,18 +13,18 @@ type Group struct {
 	// FlarumExtensions []IExtensions
 }
 
-// DoInit 初始化Group
+// DoInit Initialize Group
 func (g *Group) DoInit(id uint64) {
 	g.setID(id)
 	g.setType("groups")
 }
 
-// GetType 获取类型
+// GetType Get type
 func (g *Group) GetType() string {
 	return g.Type
 }
 
-// // GetAttributes 获取属性
+// // GetAttributes Get attributes
 // func (g *Group) GetAttributes() map[string]interface{} {
 // 	return nil
 // }

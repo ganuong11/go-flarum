@@ -6,7 +6,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// BaseUser 基础的用户类
+// BaseUser Basic user class
 type BaseUser struct {
 	BaseResources
 
@@ -28,7 +28,7 @@ type BaseUser struct {
 	IsBanned        bool `json:"isBanned"`
 }
 
-// Preferences 用户偏好设置
+// Preferences User preference settings
 type Preferences struct {
 	gorm.Model
 	NotifyDiscussionRenamedAlert bool `json:"notify_discussionRenamed_alert"`
@@ -49,7 +49,7 @@ type Preferences struct {
 	Locale string `json:"locale"`
 }
 
-// CurrentUser 当前用户信息
+// CurrentUser Current user information
 type CurrentUser struct {
 	BaseUser
 	IsEmailConfirmed bool   `json:"isEmailConfirmed"`
@@ -72,28 +72,28 @@ type CurrentUser struct {
 	Preferences Preferences `json:"preferences"`
 }
 
-// UserRelations 用户所具有的关系
+// UserRelations Relationships that the user has
 type UserRelations struct {
 	Groups RelationArray `json:"groups"`
 }
 
-// DoInit 初始化用户类
+// DoInit Initialize user class
 func (u *BaseUser) DoInit(id uint64) {
 	u.setID(id)
 	u.setType("users")
 }
 
-// GetType 获取类型
+// GetType Get type
 func (u *BaseUser) GetType() string {
 	return u.Type
 }
 
-// GetID 获取ID信息
+// GetID Get ID information
 func (u *BaseUser) GetID() uint64 {
 	return u.id
 }
 
-// // GetAttributes 获取属性
+// // GetAttributes Get attributes
 // func (u *BaseUser) GetAttributes() map[string]interface{} {
 // 	// uObj := obj.(model.User)
 // 	// fmt.Println(uObj)

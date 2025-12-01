@@ -21,20 +21,20 @@ import (
 var mobileRegexp = regexp.MustCompile(`Mobile|iP(hone|od|ad)|Android|BlackBerry|IEMobile|Kindle|NetFront|Silk-Accelerated|(hpw|web)OS|Fennec|Minimo|Opera M(obi|ini)|Blazer|Dolfin|Dolphin|Skyfire|Zune`)
 
 type (
-	// BaseHandler 基础handler
+	// BaseHandler Base handler
 	BaseHandler struct { // .. deprecated: 2020-06-11 Please don't use it
 		App *system.Application
 	}
 
-	// BasePageData 每个页面中的基础信息
+	// BasePageData Basic information in each page
 	BasePageData struct {
 		SiteCf        *model.SiteConf
 		Title         string
 		Keywords      string
 		Description   string
 		IsMobile      bool
-		IsInAdmin     bool       // 是否在admin页面中
-		CurrentUser   model.User // 历史原因: 这里切换成指针有太多的报错, 暂时不处理
+		IsInAdmin     bool       // Whether in admin page
+		CurrentUser   model.User // Historical reasons: Switching to pointer here has too many errors, temporarily not handled
 		PageName      string     // index/post_add/post_detail/...
 		ShowPostTopAd bool
 		ShowPostBotAd bool
@@ -43,7 +43,7 @@ type (
 		SiteInfo      model.SiteInfo
 		PrimaryColor  string
 	}
-	// response  返回信息
+	// response Return information
 	response struct {
 		Retcode int `json:"retcode"`
 
@@ -55,15 +55,15 @@ type (
 	flarumError struct {
 		Detail string `json:"detail"`
 	}
-	// FlarumErrorResponse  flarum API调用时出现的错误
+	// FlarumErrorResponse Error that occurs when calling flarum API
 	FlarumErrorResponse struct {
 		Errors []flarumError `json:"errors"`
 	}
 
-	// ContextKey 记录context的value
+	// ContextKey Record context value
 	ContextKey int64
 
-	// ReqContext 请求时将会携带的contex信息
+	// ReqContext Context information that will be carried during request
 	ReqContext struct {
 		currentUser   *model.User
 		inAPI         bool
@@ -75,7 +75,7 @@ type (
 		actionRecords string
 	}
 
-	// PageData 每个页面中的全部信息
+	// PageData All information in each page
 	PageData struct {
 		BasePageData
 
@@ -94,7 +94,7 @@ const (
 	ckRequest ContextKey = iota
 )
 
-// InitPageData 初始化返回页面
+// InitPageData initializes the return page
 func InitPageData(r *http.Request) *PageData {
 	ctx := GetRetContext(r)
 	h := ctx.h
@@ -123,24 +123,24 @@ func InitPageData(r *http.Request) *PageData {
 	return &pd
 }
 
-// GetRetContext 获取当前上线信息中的自有的context
+// GetRetContext gets the context from the current request context
 func GetRetContext(r *http.Request) *ReqContext {
 	return r.Context().Value(ckRequest).(*ReqContext)
 }
 
-// createSimpleFlarumError 初始化一个最简单的错误值
+// createSimpleFlarumError initializes a simple error value
 func createSimpleFlarumError(errMsg string) FlarumErrorResponse {
 	return FlarumErrorResponse{[]flarumError{initFlarumError(errMsg)}}
 }
 
-// initFlarumError 初始化一个错误值
+// initFlarumError initializes an error value
 func initFlarumError(err string) flarumError {
 	return flarumError{Detail: err}
 }
 
-// Render 渲染html
+// Render renders HTML
 /**
- * .. version_changed: 2020-05-28 增加了对flaru主题的支持, 将会渲染不同的模板
+ * .. version_changed: 2020-05-28 Added support for flarum themes, will render different templates
  */
 func (h *BaseHandler) Render(w http.ResponseWriter, tpl string, data interface{}, tplPath ...string) error {
 	if len(tplPath) == 0 {

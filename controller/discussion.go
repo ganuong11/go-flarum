@@ -74,7 +74,7 @@ func FlarumDiscussionEdit(w http.ResponseWriter, r *http.Request) {
 	h.jsonify(w, coreData.APIDocument)
 }
 
-// FlarumDiscussionDetail 获取flarum中的某篇帖子
+// FlarumDiscussionDetail gets a certain post in flarum
 // TODO: #12
 func FlarumDiscussionDetail(w http.ResponseWriter, r *http.Request) {
 	ctx := GetRetContext(r)
@@ -121,7 +121,7 @@ func FlarumDiscussionDetail(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 如果是API直接进行返回
+	// If it is API, return directly
 	if inAPI {
 		h.jsonify(w, coreData.APIDocument)
 		return
@@ -134,7 +134,7 @@ func FlarumDiscussionDetail(w http.ResponseWriter, r *http.Request) {
 	h.Render(w, tpl, evn, "layout.html", "article.html")
 }
 
-// FlarumAPICreateDiscussion 用户创建一条话题
+// FlarumAPICreateDiscussion user creates a topic
 func FlarumAPICreateDiscussion(w http.ResponseWriter, r *http.Request) {
 	ctx := GetRetContext(r)
 	h := ctx.h
@@ -144,7 +144,7 @@ func FlarumAPICreateDiscussion(w http.ResponseWriter, r *http.Request) {
 	logger := ctx.GetLogger()
 	scf := h.App.Cf.Site
 
-	// 用户创建的话题
+	// User created topic
 	type PostedDiscussion struct {
 		Data struct {
 			Type       string `json:"type"`
@@ -222,8 +222,8 @@ func FlarumAPICreateDiscussion(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// 刷新当前的页面展示
-	// TODO: 优化逻辑, 不进行全局处理
+	// Refresh current page display
+	// TODO: Optimize logic, do not perform global processing
 	go model.TimelyResort()
 
 	h.jsonify(w, coreData.APIDocument)

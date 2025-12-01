@@ -12,18 +12,18 @@ import (
 	"github.com/corvofeng/go-flarum/util"
 )
 
-// 与中间件相关的函数
+// Functions related to middleware
 
 type (
-	// HTTPHandleFunc 用于处理http请求的函数
+	// HTTPHandleFunc is used to handle HTTP request functions
 	HTTPHandleFunc func(w http.ResponseWriter, r *http.Request)
 
-	// HTTPMiddleWareFunc 中间件函数
+	// HTTPMiddleWareFunc middleware function
 	HTTPMiddleWareFunc func(inner HTTPHandleFunc) HTTPHandleFunc
 )
 
-// MiddlewareArrayToChains 中间件整理成链式的函数调用形式
-/* 当我们某个使用了多个中间件时, 可以方便的进行整合:
+// MiddlewareArrayToChains organizes middleware into chained function calls
+/* When we use multiple middlewares for a certain route, we can conveniently integrate them:
 sp.HandleFunc(pat.Get("/"), controller.ArrayToChains(
 	[]controller.ReqMiddle{
 	controller.TestMiddleware,
@@ -32,7 +32,7 @@ sp.HandleFunc(pat.Get("/"), controller.ArrayToChains(
 	h.FlarumIndex,
 ))
 
-将会返回被中间件包裹的如下形式的函数:
+It will return a function wrapped by middleware in the following form:
 controller.TestMiddleware(controller.TestMiddleware2(h.FlarumIndex))
 */
 func MiddlewareArrayToChains(reqProcessFuncs []HTTPMiddleWareFunc, req HTTPHandleFunc) (rp HTTPHandleFunc) {
@@ -44,10 +44,11 @@ func MiddlewareArrayToChains(reqProcessFuncs []HTTPMiddleWareFunc, req HTTPHandl
 	return
 }
 
-// InitMiddlewareContext 初始化的中间件需要的数据结构
+// InitMiddlewareContext initializes the data structure needed by middleware
 /*
-中间件中传递数据依赖于context设计, 当前的context作为结构体而存在, 每次请求时新建一个对应的结构体, 并存储相关信息,
-在真正处理请求时, 获取该结构体, 并获得中间件传递的信息.
+Data transfer in middleware depends on context design. The current context exists as a struct,
+a corresponding struct is created for each request and stores relevant information.
+When actually processing the request, get the struct and obtain the information passed by the middleware.
 */
 func (h *BaseHandler) InitMiddlewareContext(inner http.Handler) http.Handler {
 	mw := func(w http.ResponseWriter, r *http.Request) {
@@ -61,13 +62,13 @@ func (h *BaseHandler) InitMiddlewareContext(inner http.Handler) http.Handler {
 	return http.HandlerFunc(mw)
 }
 
-// AdjustLocaleMiddleware 调整用户的语言设置
+// AdjustLocaleMiddleware adjusts user's language settings
 func AdjustLocaleMiddleware(inner http.Handler) http.Handler {
 	mw := func(w http.ResponseWriter, r *http.Request) {
 		reqCtx := GetRetContext(r)
 		reqCtx.locale = "en"
 
-		// 已经登录过的用户, 根据自己的配置
+		// For users who have already logged in, according to their own configuration
 		user := reqCtx.currentUser
 		if user != nil {
 			obj := flarum.NewResource(flarum.ECurrentUser, user.ID)
@@ -79,7 +80,7 @@ func AdjustLocaleMiddleware(inner http.Handler) http.Handler {
 				reqCtx.locale = data.Preferences.Locale
 			}
 		} else if cookie, err := r.Cookie("locale"); err == nil {
-			// 未登录用户, 根据cookie来选择
+			// For non-logged-in users, select based on cookie
 			reqCtx.locale = cookie.Value
 		}
 		inner.ServeHTTP(w, r)
@@ -87,7 +88,7 @@ func AdjustLocaleMiddleware(inner http.Handler) http.Handler {
 	return http.HandlerFunc(mw)
 }
 
-// TrackerMiddleware 记录请求时间
+// TrackerMiddleware records request time
 func TrackerMiddleware(inner http.Handler) http.Handler {
 	logger := util.GetLogger()
 	mw := func(w http.ResponseWriter, r *http.Request) {
@@ -98,7 +99,7 @@ func TrackerMiddleware(inner http.Handler) http.Handler {
 	return http.HandlerFunc(mw)
 }
 
-// OriginMiddleware 有关跨域问题的处理
+// OriginMiddleware handles CORS issues
 func (h *BaseHandler) OriginMiddleware(inner http.Handler) http.Handler {
 	mw := func(w http.ResponseWriter, r *http.Request) {
 		origin := r.Header.Get("Origin")
@@ -112,7 +113,7 @@ func (h *BaseHandler) OriginMiddleware(inner http.Handler) http.Handler {
 	return http.HandlerFunc(mw)
 }
 
-// AuthMiddleware 校验用户
+// AuthMiddleware validates user
 func (h *BaseHandler) AuthMiddleware(inner http.Handler) http.Handler {
 	mw := func(w http.ResponseWriter, r *http.Request) {
 		reqCtx := GetRetContext(r)
@@ -127,7 +128,7 @@ func (h *BaseHandler) AuthMiddleware(inner http.Handler) http.Handler {
 	return http.HandlerFunc(mw)
 }
 
-// InAPIMiddleware 被此装饰器修饰表明当前请求为API请求
+// InAPIMiddleware decorated with this indicates that the current request is an API request
 func InAPIMiddleware(inner http.Handler) http.Handler {
 	mw := func(w http.ResponseWriter, r *http.Request) {
 		reqCtx := GetRetContext(r)
@@ -137,7 +138,7 @@ func InAPIMiddleware(inner http.Handler) http.Handler {
 	return http.HandlerFunc(mw)
 }
 
-// InAdminMiddleware 被此装饰器修饰表明当前请求为API请求
+// InAdminMiddleware decorated with this indicates that the current request is an admin request
 func InAdminMiddleware(inner http.Handler) http.Handler {
 	mw := func(w http.ResponseWriter, r *http.Request) {
 		reqCtx := GetRetContext(r)
@@ -147,7 +148,7 @@ func InAdminMiddleware(inner http.Handler) http.Handler {
 	return http.HandlerFunc(mw)
 }
 
-// MustAuthMiddleware 要求用户必须登录
+// MustAuthMiddleware requires user to be logged in
 func MustAuthMiddleware(inner HTTPHandleFunc) HTTPHandleFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		reqCtx := GetRetContext(r)
@@ -155,7 +156,7 @@ func MustAuthMiddleware(inner HTTPHandleFunc) HTTPHandleFunc {
 			w.WriteHeader(http.StatusForbidden)
 			reqCtx.h.jsonify(w, response{
 				Retcode: 403,
-				Retmsg:  "用户需要进行登录",
+				Retmsg:  "User needs to log in",
 			})
 		} else {
 			inner(w, r)
@@ -163,7 +164,7 @@ func MustAuthMiddleware(inner HTTPHandleFunc) HTTPHandleFunc {
 	}
 }
 
-// MustCSRFMiddleware 检查csrf token
+// MustCSRFMiddleware checks CSRF token
 func MustCSRFMiddleware(inner HTTPHandleFunc) HTTPHandleFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		reqCtx := GetRetContext(r)
@@ -175,7 +176,7 @@ func MustCSRFMiddleware(inner HTTPHandleFunc) HTTPHandleFunc {
 			w.WriteHeader(http.StatusForbidden)
 			reqCtx.h.jsonify(w, response{
 				Retcode: 403,
-				Retmsg:  "用户csrf token错误, 刷新页面后重试",
+				Retmsg:  "User CSRF token error, please refresh the page and try again",
 			})
 		} else {
 			inner(w, r)
@@ -183,7 +184,7 @@ func MustCSRFMiddleware(inner HTTPHandleFunc) HTTPHandleFunc {
 	}
 }
 
-// MustAdminUser 必须为管理员才能操作
+// MustAdminUser must be an administrator to operate
 func MustAdminUser(inner HTTPHandleFunc) HTTPHandleFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		reqCtx := GetRetContext(r)
@@ -192,14 +193,14 @@ func MustAdminUser(inner HTTPHandleFunc) HTTPHandleFunc {
 			w.WriteHeader(http.StatusForbidden)
 			reqCtx.h.jsonify(w, response{
 				Retcode: 403,
-				Retmsg:  "此行为仅允许管理员操作",
+				Retmsg:  "This action is only allowed for administrators",
 			})
 		}
 		inner(w, r)
 	}
 }
 
-// IsInAdmin 在admin页面中
+// IsInAdmin in admin page
 func IsInAdmin(inner HTTPHandleFunc) HTTPHandleFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		reqCtx := GetRetContext(r)
@@ -219,7 +220,7 @@ func readUserIP(r *http.Request) string {
 	return IPAddress
 }
 
-// RealIPMiddleware 获取用户的真实ip
+// RealIPMiddleware gets the user's real IP
 func RealIPMiddleware(inner http.Handler) http.Handler {
 	mw := func(w http.ResponseWriter, r *http.Request) {
 		reqCtx := GetRetContext(r)

@@ -26,7 +26,7 @@ import (
 	"github.com/go-redis/redis/v7"
 )
 
-// Application 应用数据库以及外部服务
+// Application Application database and external services
 type Application struct {
 	Cf      *model.AppConf
 	RedisDB *redis.Client
@@ -39,28 +39,28 @@ type Application struct {
 	GormDB *gorm.DB
 }
 
-// LoadConfig 从文件中初始化程序配置
+// LoadConfig Initialize program configuration from file
 func LoadConfig(filename string) *config.Engine {
 	c := &config.Engine{}
 	err := c.Load(filename)
 	logger := util.GetLogger()
 	if err != nil {
-		logger.Error("读取配置文件失败:", err)
+		logger.Error("Failed to read configuration file:", err)
 	}
 	return c
 }
 
-// Init ， 连接数据库
+// Init, connect to database
 func (app *Application) Init(c *config.Engine, currentFilePath string) {
 	// .. version_changed: 2019-11-09
-	// 添加 redis, 目前redis只用于缓存数据，理论上不能包含数据结构
+	// Add redis, currently redis is only used for caching data, theoretically cannot contain data structures
 
 	mcf := &model.MainConf{}
 	c.GetStruct("Main", mcf)
 	logger := util.GetLogger()
 	app.Logger = logger
 
-	app.Rand = rand.New(rand.NewSource(time.Now().Unix()))
+	app.Rand = rand.New(rand.NewSource(time.Now().Unix())) // Responsible for handling random numbers
 
 	// check domain
 	if strings.HasPrefix(mcf.Domain, "http") {
@@ -140,11 +140,11 @@ func (app *Application) Init(c *config.Engine, currentFilePath string) {
 		logger.Debugf("Get mysql db url: %s", mcf.MySQLURL)
 		gormConfig.Dialector = mysql.New(mysql.Config{
 			DSN:                       mcf.MySQLURL, // DSN data source name
-			DefaultStringSize:         256,          // string 类型字段的默认长度
-			DisableDatetimePrecision:  true,         // 禁用 datetime 精度
-			DontSupportRenameIndex:    true,         // 重命名索引不支持
-			DontSupportRenameColumn:   true,         // 重命名列不支持
-			SkipInitializeWithVersion: false,        // 根据当前 MySQL 版本自动配置
+			DefaultStringSize:         256,          // Default length of string type fields
+			DisableDatetimePrecision:  true,         // Disable datetime precision
+			DontSupportRenameIndex:    true,         // Rename index not supported
+			DontSupportRenameColumn:   true,         // Rename column not supported
+			SkipInitializeWithVersion: false,        // Automatically configure based on current MySQL version
 		})
 	} else if mcf.DB == "postgres" {
 		logger.Debugf("Get postgres db url: %s", mcf.PostgresURL)
@@ -168,11 +168,11 @@ func (app *Application) CanServeAdmin() bool {
 	return app.Cf.Main.CanServeAdmin
 }
 
-// Close 清理程序连接
+// Close Clean up program connections
 func (app *Application) Close() {
 	if app.RedisDB != nil {
 		app.RedisDB.Close()
 		app.RedisDB = nil
 	}
-	app.Logger.Info("db cloded")
+	app.Logger.Info("db closed")
 }

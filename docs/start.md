@@ -80,7 +80,7 @@ go-flarum_1       | 2024-07-01 15:00:27 ▶ D [main.go:78] Web server Listen por
 
 
 
-## 本地使用docker构建
+## Local Docker Build
 
 ```bash
 yarn build

@@ -11,7 +11,7 @@ import (
 	"goji.io/pat"
 )
 
-// GetLocaleData 获取地区对应的语言包
+// GetLocaleData Get language pack for the region
 func (h *BaseHandler) GetLocaleData(w http.ResponseWriter, r *http.Request) {
 	localeDir := path.Join(h.App.Cf.Main.LocaleDir)
 	logger := h.App.Logger

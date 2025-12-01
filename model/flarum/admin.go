@@ -63,8 +63,8 @@ type FlarumAdminPermissions struct {
 	UserViewLastSeenAt             []string `json:"user.viewLastSeenAt"`
 }
 
-// 这个信息存在于每个扩展的composer.json文件中
-// 作为json文件读取进来就可以了
+// This information exists in the composer.json file of each extension
+// It can be read in as a json file
 type FlarumAdminExtension interface{}
 
 func extGetLink(extData PluginComposer) map[string]interface{} {
@@ -93,7 +93,7 @@ type FlarumExtIcon struct {
 }
 
 type PluginComposer struct {
-	// 必须额外加入
+	// Must be added additionally
 	ID    string                 `json:"id"`
 	Path  string                 `json:"path"`
 	Links map[string]interface{} `json:"links"`
@@ -138,40 +138,40 @@ func toBase64(b []byte) string {
 func ReadExtensionMetadata(extionsDir string) (map[string]FlarumAdminExtension, error) {
 	exts := make(map[string]FlarumAdminExtension)
 	absPath, err := filepath.Abs(extionsDir)
-	if util.CheckError(err, "查找扩展绝对路径") {
-		return exts, errors.New("无法找到扩展目录")
+	if util.CheckError(err, "Find extension absolute path") {
+		return exts, errors.New("cannot find extension directory")
 	}
 	items, err := ioutil.ReadDir(absPath)
-	if util.CheckError(err, "读取扩展目录") {
-		return exts, errors.New("无法找到扩展目录")
+	if util.CheckError(err, "Read extension directory") {
+		return exts, errors.New("cannot find extension directory")
 	}
 	for _, item := range items {
-		// 仅认为目录是真正的扩展
+		// Only consider directories as real extensions
 		if item.IsDir() {
 			data, err := ioutil.ReadFile(path.Join(extionsDir, item.Name(), "composer.json"))
-			if util.CheckError(err, fmt.Sprintf("读取扩展%s配置失败", item.Name())) {
-				// 某个扩展读取信息失败, 仅打印日志, 不做处理
+			if util.CheckError(err, fmt.Sprintf("failed to read extension %s configuration", item.Name())) {
+				// If reading information of a certain extension fails, only print log, no processing
 				continue
 			}
 			// var extData map[string]interface{}
 			var extData PluginComposer
 			_ = json.Unmarshal([]byte(data), &extData)
 
-			// 由于admin页面类似锚点路由, 因此这里需要把/转换一次
+			// Since the admin page is similar to anchor routing, the / needs to be converted here
 			extName := strings.ReplaceAll(extData.Name, "/", "-")
 			extData.ID = extName
 
 			extData.Links = extGetLink(extData)
-			extData.Path = path.Join(absPath, item.Name()) // 必须增加path变量
+			extData.Path = path.Join(absPath, item.Name()) // Must add path variable
 			extData.Icon = extData.Extra.FlarumExtension.Icon
 
 			if extData.Icon.Image != "" {
-				// 参考flarum/src/Extension/Extension.php, 读取文件作为图标
+				// Refer to flarum/src/Extension/Extension.php, read file as icon
 				bytes, err := ioutil.ReadFile(path.Join(extData.Path, extData.Icon.Image))
 				if err != nil {
 					log.Fatal(err)
 				}
-				if util.CheckError(err, "读取扩展的图标") {
+				if util.CheckError(err, "Read the extension's icon") {
 					continue
 				}
 				LOGO_MIMETYPES := map[string]string{
@@ -185,8 +185,8 @@ func ReadExtensionMetadata(extionsDir string) (map[string]FlarumAdminExtension, 
 				extData.Icon.BackgroundImage = fmt.Sprintf("url('data:%s;base64,%s')", mimeType, base64Encoding)
 			}
 
-			// 下面可加可不加
-			extData.InstallPath = path.Join(absPath, item.Name()) // 必须增加path变量
+			// The following can be added or not
+			extData.InstallPath = path.Join(absPath, item.Name()) // Must add path variable
 			extData.InstallationSource = "dist"
 			extData.HasMigrations = true
 			extData.HasAssets = false

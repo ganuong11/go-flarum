@@ -15,7 +15,7 @@ import (
 	"github.com/go-redis/redis/v7"
 )
 
-// 记录当前的过滤器内容
+// Record current filter content
 type filterType string
 
 const (
@@ -48,7 +48,7 @@ func createFlarumPageAPIDoc(
 	var hasNext bool = false
 	coreData := flarum.NewCoreData()
 
-	apiDoc := &coreData.APIDocument // 注意, 获取到的是指针
+	apiDoc := &coreData.APIDocument // Note: this gets a pointer
 
 	inAPI := reqctx.inAPI
 	siteInfo := model.GetSiteInfo(redisDB)
@@ -57,12 +57,12 @@ func createFlarumPageAPIDoc(
 	allUsers := make(map[uint64]bool)
 	logger.Debugf("query with %+v", df)
 
-	// 添加当前用户的session信息
+	// Add current user's session information
 	if currentUser != nil {
 		user := model.FlarumCreateCurrentUser(*currentUser)
 		allUsers[user.GetID()] = true
 		coreData.AddCurrentUser(user)
-		if !inAPI { // 做API请求时, 不更新csrf信息
+		if !inAPI { // When making API requests, do not update CSRF information
 			coreData.AddSessionData(user, currentUser.RefreshCSRF(redisDB))
 		}
 	}
@@ -81,7 +81,7 @@ func createFlarumPageAPIDoc(
 	categories, err := model.SQLGetTags(gormDB)
 	// logger.Debugf("Get topics %+v", topics)
 
-	// 添加所有分类的信息
+	// Add all category information
 	var flarumTags []flarum.Resource
 	for _, category := range categories {
 		tag := model.FlarumCreateTag(category)
@@ -89,14 +89,14 @@ func createFlarumPageAPIDoc(
 		flarumTags = append(flarumTags, tag)
 	}
 
-	// 添加主站点信息
+	// Add main site information
 	coreData.AppendResources(model.FlarumCreateForumInfo(
 		currentUser,
 		appConf, siteInfo, flarumTags,
 	))
 
 	var res []flarum.Resource
-	// 添加当前页面的的帖子与用户信息, 已经去重
+	// Add posts and user information on the current page, already deduplicated
 	for idx, topic := range topics {
 		logger.Debugf("Get topic %d with tags: %+v title: %s", topic.ID, func() []string {
 			var urlNames []string
@@ -114,8 +114,8 @@ func createFlarumPageAPIDoc(
 		res = append(res, diss)
 		coreData.AppendResources(diss)
 		getUser := func(uid uint64) {
-			// 用户不存在则添加, 已经存在的用户不会考虑
-			// TODO: 多次执行SQL可能会有性能问题
+			// Add if user does not exist, existing users will not be considered
+			// TODO: Multiple SQL executions may have performance issues
 			if _, ok := allUsers[uid]; !ok {
 				var u model.User
 				result := gormDB.First(&u, uid)
@@ -155,7 +155,7 @@ func createFlarumPageAPIDoc(
 	return coreData, err
 }
 
-// FlarumIndex flarum主页
+// FlarumIndex flarum homepage
 func FlarumIndex(w http.ResponseWriter, r *http.Request) {
 	var err error
 	ctx := GetRetContext(r)
@@ -186,7 +186,7 @@ func FlarumIndex(w http.ResponseWriter, r *http.Request) {
 	}
 	coreData, err := createFlarumPageAPIDoc(ctx, redisDB, h.App.GormDB, *h.App.Cf, df, scf.TimeZone)
 	if err != nil {
-		h.flarumErrorMsg(w, "无法获取帖子信息")
+		h.flarumErrorMsg(w, "Unable to get post information")
 		return
 	}
 
@@ -208,7 +208,7 @@ func FlarumIndex(w http.ResponseWriter, r *http.Request) {
 	h.Render(w, tpl, evn, "layout.html", "index.html")
 }
 
-// FlarumAPIDiscussions flarum文章api
+// FlarumAPIDiscussions flarum article api
 func FlarumAPIDiscussions(w http.ResponseWriter, r *http.Request) {
 	ctx := GetRetContext(r)
 	h := ctx.h
@@ -221,24 +221,24 @@ func FlarumAPIDiscussions(w http.ResponseWriter, r *http.Request) {
 	logger := h.App.Logger
 	coreData := flarum.NewCoreData()
 	// const pageLimit = 20
-	// apiDoc := &coreData.APIDocument // 注意, 获取到的是指针
+	// apiDoc := &coreData.APIDocument // Note: this gets a pointer
 
-	// 需要返回的relations TODO: use it
+	// Relations to be returned TODO: use it
 	_include := r.FormValue("include")
 	strings.Split(_include, ",")
 
-	// 当前的排序方式 TODO: use it
+	// Current sorting method TODO: use it
 	// _sort := r.FormValue("sort")
 	// strings.Split(_sort, ",")
 
-	// 当前的过滤方式 filter[tag]:  tag:r_funny
+	// Current filtering method filter[tag]: tag:r_funny
 	_tag_filter := r.FormValue("filter[tag]")
 	_author_filter := r.FormValue("filter[author]")
 	if _tag_filter == "" {
 		_tag_filter, _ = h.safeGetParm(r, "tag")
 	}
 
-	// 当前的偏移数目, 可得到页码数目, 页码从1开始
+	// Current offset number, can get page number, page starts from 1
 	_offset := r.FormValue("page[offset]")
 	if _offset == "" {
 		_offset = "0"
@@ -297,13 +297,13 @@ func FlarumAPIDiscussions(w http.ResponseWriter, r *http.Request) {
 			}
 		} else {
 			// logger.Warning("Can't use filter:", _filter)
-			h.flarumErrorJsonify(w, createSimpleFlarumError("过滤器未实现"))
+			h.flarumErrorJsonify(w, createSimpleFlarumError("Filter not implemented"))
 			return
 		}
 	}
 
 	if err != nil {
-		h.flarumErrorJsonify(w, createSimpleFlarumError("无法获取帖子信息"))
+		h.flarumErrorJsonify(w, createSimpleFlarumError("Unable to get post information"))
 		return
 	}
 

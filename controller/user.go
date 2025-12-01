@@ -16,7 +16,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// UserLogin 用户登录与注册页面
+// UserLogin user login and registration page
 func (h *BaseHandler) UserLogin(w http.ResponseWriter, r *http.Request) {
 	type pageData struct {
 		BasePageData
@@ -25,9 +25,9 @@ func (h *BaseHandler) UserLogin(w http.ResponseWriter, r *http.Request) {
 		CaptchaID string
 	}
 	act := strings.TrimLeft(r.RequestURI, "/")
-	title := "登录"
+	title := "Login"
 	if act == "register" {
-		title = "注册"
+		title = "Register"
 	}
 
 	tpl := h.CurrentTpl(r)
@@ -53,11 +53,11 @@ func (h *BaseHandler) UserLogin(w http.ResponseWriter, r *http.Request) {
 	h.Render(w, tpl, evn, "layout.html", "userlogin.html")
 }
 
-// NewCaptcha 获取新的验证码
+// NewCaptcha gets new captcha
 func NewCaptcha(w http.ResponseWriter, r *http.Request) {
 	ctx := GetRetContext(r)
 	h := ctx.h
-	// 返回并且携带新的验证码
+	// Return and carry new captcha
 	type captchaData struct {
 		response
 		NewCaptchaID string `json:"newCaptchaID"`
@@ -69,7 +69,7 @@ func NewCaptcha(w http.ResponseWriter, r *http.Request) {
 	h.jsonify(w, respCaptcha)
 }
 
-// FlarumUserRegister 用户注册
+// FlarumUserRegister user registration
 func FlarumUserRegister(w http.ResponseWriter, r *http.Request) {
 	ctx := GetRetContext(r)
 	h := ctx.h
@@ -87,14 +87,14 @@ func FlarumUserRegister(w http.ResponseWriter, r *http.Request) {
 	if err := decoder.Decode(&rec); err != nil {
 		rsp = normalRsp{
 			400,
-			"表单解析错误:" + err.Error(),
+			"Form parsing error:" + err.Error(),
 		}
 		h.jsonify(w, rsp)
 		return
 	}
 	defer r.Body.Close()
 
-	// 返回并且携带新的验证码
+	// Return and carry new captcha
 	type captchaData struct {
 		response
 		NewCaptchaID string `json:"newCaptchaID"`
@@ -104,7 +104,7 @@ func FlarumUserRegister(w http.ResponseWriter, r *http.Request) {
 
 	if !captcha.VerifyString(rec.CaptchaID, rec.CaptchaSolution) {
 		respCaptcha = captchaData{
-			response{405, "验证码错误"},
+			response{405, "Captcha error"},
 			model.NewCaptcha(filepath.Join(h.App.Cf.Main.StaticDir, "captcha")),
 		}
 		h.jsonify(w, respCaptcha)
@@ -114,19 +114,19 @@ func FlarumUserRegister(w http.ResponseWriter, r *http.Request) {
 	if _, err := model.SQLUserRegister(h.App.GormDB, rec.Name, rec.Email, rec.Password); err != nil {
 		rsp = normalRsp{
 			400,
-			"注册失败:" + err.Error(),
+			"Registration failed:" + err.Error(),
 		}
 		h.jsonify(w, rsp)
 		return
 	}
 
 	rsp.Retcode = 200
-	rsp.Retmsg = "注册成功"
+	rsp.Retmsg = "Registration successful"
 
 	h.jsonify(w, rsp)
 }
 
-// FlarumUserLogin flarum用户登录
+// FlarumUserLogin flarum user login
 func FlarumUserLogin(w http.ResponseWriter, r *http.Request) {
 	ctx := GetRetContext(r)
 	h := ctx.h
@@ -142,25 +142,25 @@ func FlarumUserLogin(w http.ResponseWriter, r *http.Request) {
 	var rec recForm
 	err := decoder.Decode(&rec)
 	if err != nil {
-		rsp = normalRsp{400, "数据填写错误:" + err.Error()}
+		rsp = normalRsp{400, "Data filling error:" + err.Error()}
 		h.jsonify(w, rsp)
 		return
 	}
 	if rec.Identification == "" || rec.Password == "" {
-		rsp = normalRsp{400, "请填写登录信息与密码"}
+		rsp = normalRsp{400, "Please fill in login information and password"}
 		h.jsonify(w, rsp)
 		return
 	}
 	defer r.Body.Close()
 
-	// 返回并且携带新的验证码
+	// Return and carry new captcha
 	type captchaData struct {
 		response
 		NewCaptchaID string `json:"newCaptchaID"`
 	}
 	var respCaptcha captchaData
 	if !captcha.VerifyString(rec.CaptchaID, rec.CaptchaSolution) {
-		rsp = normalRsp{405, "验证码错误"}
+		rsp = normalRsp{405, "Captcha error"}
 		h.jsonify(w, rsp)
 		return
 	}
@@ -169,13 +169,13 @@ func FlarumUserLogin(w http.ResponseWriter, r *http.Request) {
 
 	uobj, err := model.SQLUserGetByName(h.App.GormDB, rec.Identification)
 	if err != nil {
-		rsp = normalRsp{405, "登录失败, 请检查用户名与密码"}
+		rsp = normalRsp{405, "Login failed, please check username and password"}
 		h.jsonify(w, respCaptcha)
 		return
 	}
 	if uobj.Password != rec.Password {
 		logger.Debugf("For user %s, want %s but get %s", uobj.Name, uobj.Password, rec.Password)
-		rsp = normalRsp{405, "登录失败, 请检查用户名与密码"}
+		rsp = normalRsp{405, "Login failed, please check username and password"}
 		h.jsonify(w, rsp)
 		return
 	}
@@ -187,7 +187,7 @@ func FlarumUserLogin(w http.ResponseWriter, r *http.Request) {
 	h.SetCookie(w, "SessionID", uobj.StrID()+":"+sessionid, 365)
 
 	rsp.Retcode = 200
-	rsp.Retmsg = "登录成功"
+	rsp.Retmsg = "Login successful"
 	h.jsonify(w, rsp)
 }
 
@@ -214,18 +214,18 @@ func createFlarumUserAPIDoc(
 	logger := reqctx.GetLogger()
 	siteInfo := model.GetSiteInfo(redisDB)
 
-	// 所有分类的信息, 用于整个站点的信息
+	// All category information, used for the entire site information
 	var flarumTags []flarum.Resource
 
-	// 添加当前用户的session信息
+	// Add current user's session information
 	if currentUser != nil {
 		user := model.FlarumCreateCurrentUser(*currentUser)
 		coreData.AddCurrentUser(user)
-		if !inAPI { // 做API请求时, 不更新csrf信息
+		if !inAPI { // When making API requests, do not update CSRF information
 			coreData.AddSessionData(user, currentUser.RefreshCSRF(redisDB))
 		}
 	}
-	// 添加当前站点信息
+	// Add current site information
 	categories, err := model.SQLGetTags(gormDB)
 	if err != nil {
 		logger.Error("Get all categories error", err)
@@ -242,7 +242,7 @@ func createFlarumUserAPIDoc(
 	return coreData, err
 }
 
-// FlarumUserLogout flarum用户注销
+// FlarumUserLogout flarum user logout
 func FlarumUserLogout(w http.ResponseWriter, r *http.Request) {
 	ctx := GetRetContext(r)
 	h := ctx.h
@@ -251,19 +251,19 @@ func FlarumUserLogout(w http.ResponseWriter, r *http.Request) {
 
 	token := r.FormValue("token")
 	if token == "" {
-		rsp = normalRsp{400, "表单参数解析错误"}
+		rsp = normalRsp{400, "Form parameter parsing error"}
 		h.jsonify(w, rsp)
 		return
 	}
 	user, err := h.CurrentUser(w, r)
 	if err != nil {
-		rsp = normalRsp{400, "用户未登录:" + err.Error()}
+		rsp = normalRsp{400, "User not logged in:" + err.Error()}
 		h.jsonify(w, rsp)
 		return
 	}
 
 	if !user.VerifyCSRFToken(redisDB, token) {
-		rsp = normalRsp{400, "csrf错误"}
+		rsp = normalRsp{400, "CSRF error"}
 		h.jsonify(w, rsp)
 		return
 	}
@@ -271,11 +271,11 @@ func FlarumUserLogout(w http.ResponseWriter, r *http.Request) {
 	userLogout(user, h, w, r)
 	http.Redirect(w, r, "/", http.StatusSeeOther)
 	rsp.Retcode = 200
-	rsp.Retmsg = "登出成功"
+	rsp.Retmsg = "Logout successful"
 	h.jsonify(w, rsp)
 }
 
-// FlarumUser flarum用户查询
+// FlarumUser flarum user query
 func FlarumUser(w http.ResponseWriter, r *http.Request) {
 	ctx := GetRetContext(r)
 	h := ctx.h
@@ -286,7 +286,7 @@ func FlarumUser(w http.ResponseWriter, r *http.Request) {
 	user, err := model.SQLUserGet(h.App.GormDB, _userID)
 
 	if err != nil {
-		h.flarumErrorJsonify(w, createSimpleFlarumError("获取用户信息错误: "+err.Error()))
+		h.flarumErrorJsonify(w, createSimpleFlarumError("Get user information error: "+err.Error()))
 		return
 	}
 
@@ -305,7 +305,7 @@ func FlarumUser(w http.ResponseWriter, r *http.Request) {
 	h.Render(w, tpl, evn, "layout.html", "index.html")
 }
 
-// FlarumUserSettings flarum用户查询
+// FlarumUserSettings flarum user query
 func FlarumUserSettings(w http.ResponseWriter, r *http.Request) {
 	ctx := GetRetContext(r)
 	h := ctx.h
@@ -317,7 +317,7 @@ func FlarumUserSettings(w http.ResponseWriter, r *http.Request) {
 
 	coreData, err := createFlarumUserAPIDoc(ctx, gormDB, redisDB, *h.App.Cf, scf.TimeZone)
 	if err != nil {
-		h.flarumErrorMsg(w, "查询用户信息错误:"+err.Error())
+		h.flarumErrorMsg(w, "Query user information error:"+err.Error())
 	}
 	evn := InitPageData(r)
 	evn.FlarumInfo = coreData
@@ -325,7 +325,7 @@ func FlarumUserSettings(w http.ResponseWriter, r *http.Request) {
 	h.Render(w, tpl, evn, "layout.html", "index.html")
 }
 
-// FlarumUserPage flarum用户查询
+// FlarumUserPage flarum user query
 func FlarumUserPage(w http.ResponseWriter, r *http.Request) {
 	ctx := GetRetContext(r)
 	h := ctx.h
@@ -336,7 +336,7 @@ func FlarumUserPage(w http.ResponseWriter, r *http.Request) {
 	user, err := model.SQLUserGetByName(h.App.GormDB, username)
 
 	if err != nil {
-		h.flarumErrorJsonify(w, createSimpleFlarumError("获取用户信息错误"+err.Error()))
+		h.flarumErrorJsonify(w, createSimpleFlarumError("Get user information error"+err.Error()))
 		return
 	}
 
@@ -351,11 +351,11 @@ func FlarumUserPage(w http.ResponseWriter, r *http.Request) {
 
 	coreData, err := createFlarumPageAPIDoc(ctx, redisDB, h.App.GormDB, *h.App.Cf, df, scf.TimeZone)
 	if err != nil {
-		h.flarumErrorMsg(w, "无法获取帖子信息")
+		h.flarumErrorMsg(w, "Unable to get post information")
 		return
 	}
 
-	// 添加主站点信息
+	// Add main site information
 	si := model.GetSiteInfo(redisDB)
 
 	coreData.AppendResources(model.FlarumCreateForumInfo(
@@ -370,11 +370,11 @@ func FlarumUserPage(w http.ResponseWriter, r *http.Request) {
 	coreData.AppendResources(u)
 	apiDoc.SetData(u)
 	currentUser := ctx.currentUser
-	// 添加当前用户的session信息
+	// Add current user's session information
 	if currentUser != nil {
 		user := model.FlarumCreateCurrentUser(*currentUser)
 		coreData.AddCurrentUser(user)
-		if !inAPI { // 做API请求时, 不更新csrf信息
+		if !inAPI { // When making API requests, do not update CSRF information
 			coreData.AddSessionData(user, currentUser.RefreshCSRF(redisDB))
 		}
 	}
@@ -389,13 +389,13 @@ func FlarumUserPage(w http.ResponseWriter, r *http.Request) {
 	h.Render(w, tpl, evn, "layout.html", "index.html")
 }
 
-// FlarumUserUpdate flarum用户更新配置信息
+// FlarumUserUpdate flarum user update configuration information
 func FlarumUserUpdate(w http.ResponseWriter, r *http.Request) {
 	_uid := pat.Param(r, "uid")
 	ctx := GetRetContext(r)
 	h := ctx.h
 	if ctx.currentUser.StrID() != _uid {
-		h.flarumErrorMsg(w, "当期仅允许修改自己的配置")
+		h.flarumErrorMsg(w, "Currently only allows modifying own configuration")
 		return
 	}
 
@@ -412,7 +412,7 @@ func FlarumUserUpdate(w http.ResponseWriter, r *http.Request) {
 	userUpdateInfo := UserUpdate{}
 	err := json.NewDecoder(r.Body).Decode(&userUpdateInfo)
 	if err != nil {
-		h.flarumErrorMsg(w, "解析json错误:"+err.Error())
+		h.flarumErrorMsg(w, "Parse JSON error:"+err.Error())
 		return
 	}
 	ctx.currentUser.SetPreference(
