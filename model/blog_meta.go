@@ -9,19 +9,19 @@ import (
 type BlogMeta struct {
 	gorm.Model
 	ID      uint64 `gorm:"primaryKey"`
-	TopicID uint64 `gorm:"column:topic_id;index"` // 关联的主题ID
+	TopicID uint64 `gorm:"column:topic_id;index"` // Associated topic ID
 
-	Summary         string `json:"summary"`           // 摘要
-	FeaturedImage   string `json:"featured_image"`    // 特色图片
-	IsFeatured      bool   `json:"is_featured"`       // 是否是特色文章
-	IsPendingReview bool   `json:"is_pending_review"` // 是否待审核
-	IsSized         bool   `json:"is_sized"`          // 是否已调整大小
+	Summary         string `json:"summary"`           // Summary
+	FeaturedImage   string `json:"featured_image"`    // Featured image
+	IsFeatured      bool   `json:"is_featured"`       // Whether it is a featured article
+	IsPendingReview bool   `json:"is_pending_review"` // Whether it is pending review
+	IsSized         bool   `json:"is_sized"`          // Whether it has been resized
 
-	// TopicData Topic `gorm:"foreignKey:ID;references:TopicID"` // 关联的主题
+	// TopicData Topic `gorm:"foreignKey:ID;references:TopicID"` // Associated topic
 }
 
 func (blogMeta *BlogMeta) CreateFlarumBlogMeta(gormDB *gorm.DB) (bool, error) {
-	// 创建或更新博客元数据
+	// Create or update blog metadata
 	if err := gormDB.Create(blogMeta).Error; err != nil {
 		return false, err
 	}
@@ -29,7 +29,7 @@ func (blogMeta *BlogMeta) CreateFlarumBlogMeta(gormDB *gorm.DB) (bool, error) {
 }
 
 func (blogMeta *BlogMeta) CreateOrUpdate(gormDB *gorm.DB) error {
-	// 创建或更新博客元数据
+	// Create or update blog metadata
 	if blogMeta.ID == 0 {
 		return gormDB.Create(blogMeta).Error
 	}
@@ -46,7 +46,7 @@ func (blogMeta *BlogMeta) GetFormatedString() string {
 }
 
 func SQLGetAllBlogMeta(gormDB *gorm.DB) (metas []BlogMeta, err error) {
-	// 获取所有博客元数据
+	// Get all blog metadata
 	// err = gormDB.Preload("TopicData").Find(&metas).Error
 	err = gormDB.Find(&metas).Error
 	if err != nil {
@@ -56,7 +56,7 @@ func SQLGetAllBlogMeta(gormDB *gorm.DB) (metas []BlogMeta, err error) {
 }
 
 func SQLGetBlogMetaByTopicID(gormDB *gorm.DB, topicID uint64) (meta BlogMeta, err error) {
-	// 获取指定主题的博客元数据
+	// Get blog metadata for specified topic
 	err = gormDB.First(&meta, "topic_id = ?", topicID).Error
 	if err != nil {
 		return meta, err
@@ -65,7 +65,7 @@ func SQLGetBlogMetaByTopicID(gormDB *gorm.DB, topicID uint64) (meta BlogMeta, er
 }
 
 func SQLGetBlogMetaByID(gormDB *gorm.DB, id uint64) (meta BlogMeta, err error) {
-	// 获取指定ID的博客元数据
+	// Get blog metadata for specified ID
 	err = gormDB.First(&meta, "id = ?", id).Error
 	if err != nil {
 		return meta, err
@@ -74,7 +74,7 @@ func SQLGetBlogMetaByID(gormDB *gorm.DB, id uint64) (meta BlogMeta, err error) {
 }
 
 func SQLSaveBlogMeta(gormDB *gorm.DB, meta *BlogMeta) error {
-	// 保存或更新博客元数据
+	// Save or update blog metadata
 	if meta.ID == 0 {
 		return gormDB.Create(meta).Error
 	}

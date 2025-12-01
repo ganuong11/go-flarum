@@ -6,42 +6,42 @@ import (
 	"strconv"
 )
 
-// EResourceType flarum中的资源类型
-// E是enum的意思
+// EResourceType resource types in flarum
+// E means enum
 type EResourceType string
 
 const (
-	// EBaseUser 基础用户
+	// EBaseUser base user
 	EBaseUser EResourceType = "baseuser"
 
-	// ECurrentUser 当前用户
+	// ECurrentUser current user
 	ECurrentUser EResourceType = "current"
 
-	// EBaseDiscussion 帖子基础资源
+	// EBaseDiscussion post base resource
 	EBaseDiscussion EResourceType = "base_discussion"
 
-	// EDiscussion 帖子资源
+	// EDiscussion post resource
 	EDiscussion EResourceType = "discussion"
 
-	// EForum 论坛信息
+	// EForum forum information
 	EForum EResourceType = "forums"
 
-	// ETAG 标签信息
+	// ETAG tag information
 	ETAG EResourceType = "tag"
 
-	// EPost 评论信息
+	// EPost comment information
 	EPost EResourceType = "post"
 
-	// EGroup 信息
+	// EGroup information
 	EGroup EResourceType = "group"
 
-	// FoFUpload FoF上传文件
+	// FoFUpload FoF upload files
 	EFoFUploadFiles EResourceType = "files"
 
 	EBlogMeta EResourceType = "blogMeta"
 )
 
-// IDataBase flarum数据
+// IDataBase flarum data
 type IDataBase interface {
 	// GetAttributes()
 	DoInit(uint64)
@@ -50,15 +50,15 @@ type IDataBase interface {
 	GetAttributes() (map[string]interface{}, error)
 }
 
-// BaseRelation flarum中的基础资源关系
+// BaseRelation base resource relations in flarum
 type BaseRelation struct {
 	BaseResources
 }
 
-// Struct2Map 将结构体转换为json
+// Struct2Map convert struct to json
 /**
- * From https://stackoverflow.com/a/42849112 也许这样的方式并不快, 但一定是bug最少的
- * 如果成为了瓶颈再考虑优化吧
+ * From https://stackoverflow.com/a/42849112 Maybe this way is not fast, but it must have the least bugs
+ * If it becomes a bottleneck, consider optimization
  */
 func Struct2Map(obj interface{}) (newMap map[string]interface{}, err error) {
 	data, err := json.Marshal(obj) // Convert to a json string
@@ -71,9 +71,9 @@ func Struct2Map(obj interface{}) (newMap map[string]interface{}, err error) {
 
 // -------------  BaseResources ---------------
 
-// BaseResources 基础的资源结构
+// BaseResources base resource structure
 /**
- * 请不要直接修改结构体中的变量
+ * Please do not directly modify the variables in the struct
  */
 type BaseResources struct {
 	// Issue-5: flarum needs id as string
@@ -84,33 +84,33 @@ type BaseResources struct {
 	Type string `json:"type"`
 }
 
-// DoInit 空函数, 占位使用
+// DoInit empty function, placeholder use
 func (r *BaseResources) DoInit() {}
 
-// setID 绑定ID
+// setID bind ID
 func (r *BaseResources) setID(id uint64) {
 	r.id = id
 	r.ID = strconv.FormatUint(id, 10)
 }
 
-// SetType 绑定类型
+// SetType bind type
 func (r *BaseResources) setType(t string) {
 	r.Type = t
 }
 
-// GetID 获取ID
+// GetID get ID
 func (r *BaseResources) GetID() uint64 {
 	return r.id
 }
 
-// GetType 绑定类型
+// GetType bind type
 func (r *BaseResources) GetType() string {
 	return r.Type
 }
 
-// GetAttributes 获取结构体的属性值
+// GetAttributes get the attribute values of the struct
 /**
- * 基类将会默认拥有这一函数, 但是理论上讲该函数不该被调用, 就和base resources不该被使用一样
+ * The base class will have this function by default, but in theory this function should not be called, just like base resources should not be used
  */
 func (r *BaseResources) GetAttributes() (map[string]interface{}, error) {
 	panic("Please write your own get attributes")
@@ -118,64 +118,64 @@ func (r *BaseResources) GetAttributes() (map[string]interface{}, error) {
 
 // -------------  BaseResources ---------------
 
-// IRelation 具有的一些函数
+// IRelation some functions it has
 type IRelation interface {
 	// field, data
 	// BindRelation(string, interface{})
 }
 
-// RelationDict 字典形式的关系
+// RelationDict dictionary form relations
 type RelationDict struct {
 	Data BaseRelation `json:"data"`
 }
 
-// RelationArray 数组形式的关系
+// RelationArray array form relations
 type RelationArray struct {
 	Data []BaseRelation `json:"data"`
 }
 
-// Resource flarum资源
+// Resource flarum resource
 type Resource struct {
 	BaseResources
 	Attributes    IDataBase `json:"attributes"`
 	Relationships IRelation `json:"relationships"`
 }
 
-// GetAttributes 获取结构体的属性值, 基类将会继承这一函数
+// GetAttributes get the attribute values of the struct, the base class will inherit this function
 func (r *Resource) GetAttributes() (map[string]interface{}, error) {
 	return Struct2Map(r)
 }
 
-// Session flarum session数据
+// Session flarum session data
 type Session struct {
 	UserID    uint64 `json:"userId"`
 	CsrfToken string `json:"csrfToken"`
 }
 
-// APIDoc flarum api将会返回的结果
+// APIDoc the result that flarum api will return
 type APIDoc struct {
 	/**
-	 * 虽然感觉没有在用, 但是需要保留
-	 * Links 当前可点的链接:
-	 * 		first: 首页
-	 * 		next: 下一页
-	 * 		prev: 前一页
+	 * Although it feels not in use, but need to keep
+	 * Links currently clickable links:
+	 * 		first: home page
+	 * 		next: next page
+	 * 		prev: previous page
 	 */
 	Links map[string]string `json:"links"`
 
 	/**
-	 * Data API返回是的主要数据, 有一点很坑:
-	 *    在disscussion帖子信息时 此变量是数组类型, 是要展示的主题合集
-	 *    但是在请求post评论信息是 此变量是字典类型, 当前的评论所对应的一个主题
+	 * Data The main data returned by API, there is a pit:
+	 *    When discussion post information, this variable is array type, the topic collection to be displayed
+	 *    But when requesting post comment information, this variable is dictionary type, a topic corresponding to the current comment
 	 *
-	 *  ALERT: 这里必须使用interface{}类型, 并且赋值时只能使用SetData函数
+	 *  ALERT: Must use interface{} type here, and can only use SetData function when assigning
 	 */
 	Data interface{} `json:"data"`
 
 	Included []Resource `json:"included"`
 }
 
-// CoreData flarum页面需要返回的数据
+// CoreData data that flarum page needs to return
 type CoreData struct {
 	Resources   []Resource        `json:"resources"`
 	Sessions    Session           `json:"session"`
@@ -184,7 +184,7 @@ type CoreData struct {
 	APIDocument APIDoc            `json:"apiDocument"`
 }
 
-// NewResource 根据类型初始化一个资源
+// NewResource initialize a resource according to type
 func NewResource(resourceType EResourceType, id uint64) Resource {
 	var obj Resource
 	var data IDataBase
@@ -229,7 +229,7 @@ func NewResource(resourceType EResourceType, id uint64) Resource {
 	return obj
 }
 
-// newAPIDoc 新建一个APIDoc对象
+// newAPIDoc create a new APIDoc object
 func newAPIDoc() APIDoc {
 	apiDoc := APIDoc{}
 	apiDoc.Links = make(map[string]string)
@@ -238,29 +238,29 @@ func newAPIDoc() APIDoc {
 	return apiDoc
 }
 
-// NewCoreData 新建一个CoreData对象
-// 使用方法:
+// NewCoreData create a new CoreData object
+// Usage:
 //
 //	coreData := flarum.NewCoreData()
-//	apiDoc := &coreData.APIDocument // 注意, 获取到的是指针
+//	apiDoc := &coreData.APIDocument // Note, what is obtained is a pointer
 func NewCoreData() CoreData {
 	coreData := CoreData{}
 	coreData.APIDocument = newAPIDoc()
 	return coreData
 }
 
-// NewAdminCoreData 新建一个CoreData对象
-// 使用方法:
+// NewAdminCoreData create a new CoreData object
+// Usage:
 //
 //	coreData := flarum.NewAdminCoreData()
-//	apiDoc := &coreData.APIDocument // 注意, 获取到的是指针
+//	apiDoc := &coreData.APIDocument // Note, what is obtained is a pointer
 func NewAdminCoreData() AdminCoreData {
 	adminCoreData := AdminCoreData{}
 	adminCoreData.APIDocument = newAPIDoc()
 	return adminCoreData
 }
 
-// SetData 设置为字典类型的数据
+// SetData set to dictionary type data
 /*
  * Follow this issue:
  * 	https://stackoverflow.com/a/56201087
@@ -280,23 +280,23 @@ func (apiDoc *APIDoc) SetData(data interface{}) {
 	apiDoc.Data = data
 }
 
-// AppendResources 添加资源
+// AppendResources add resources
 func (apiDoc *APIDoc) AppendResources(res Resource) {
 	apiDoc.Included = append(apiDoc.Included, res)
 }
 
-// AppendResources 添加资源
+// AppendResources add resources
 func (coreData *CoreData) AppendResources(res Resource) {
 	coreData.APIDocument.AppendResources(res)
 	coreData.Resources = append(coreData.Resources, res)
 }
 
-// AddCurrentUser 增加当前用户的信息
+// AddCurrentUser add current user information
 func (coreData *CoreData) AddCurrentUser(user Resource) {
 	coreData.AppendResources(user)
 }
 
-// AddSessionData 添加用户的session信息, 仅用于csrf
+// AddSessionData add user's session information, only for csrf
 func (coreData *CoreData) AddSessionData(user Resource, csrf string) {
 	coreData.Sessions = Session{
 		UserID:    user.GetID(),
@@ -304,12 +304,12 @@ func (coreData *CoreData) AddSessionData(user Resource, csrf string) {
 	}
 }
 
-// BindRelations 绑定关系
+// BindRelations bind relations
 func (r *Resource) BindRelations(field string, data IRelation) {
 	reflect.ValueOf(r.Relationships).Elem().FieldByName(field).Set(reflect.ValueOf(data))
 }
 
-// InitBaseResources 初始化一个基础资源
+// InitBaseResources initialize a base resource
 func InitBaseResources(id uint64, t string) BaseRelation {
 	br := BaseRelation{}
 	br.setID(id)

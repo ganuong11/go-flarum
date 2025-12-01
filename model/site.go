@@ -54,7 +54,7 @@ type MainConf struct {
 	TLSCrtFile     string
 	TLSKeyFile     string
 
-	S3Config S3ConfigConf // S3配置
+	S3Config S3ConfigConf // S3 configuration
 
 	// secure cookie needed during initialization
 	SCHashKey  string
@@ -70,7 +70,7 @@ type SiteConf struct {
 	AdminEmail string
 	MainDomain string // Add URL prefix after uploading image, eg: http://domain.com, http://234.21.35.89:8082
 
-	CDNBaseURL string // 静态文件cdn地址
+	CDNBaseURL string // Static file CDN address
 
 	MainNodeIDs       string
 	TimeZone          int

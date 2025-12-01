@@ -9,12 +9,12 @@ const (
 	TIME_FMT = "2006-01-02 15:04"
 )
 
-// TimeNow 当前时间
+// TimeNow current time
 func TimeNow() uint64 {
 	return uint64(time.Now().UTC().Unix())
 }
 
-// TimeFmt 格式化时间戳
+// TimeFmt format timestamp
 func TimeFmt(tp interface{}, sample string, tz int) string {
 	offset := int64(time.Duration(tz) * time.Hour)
 	var t int64
@@ -37,7 +37,7 @@ func TimeFmt(tp interface{}, sample string, tz int) string {
 	return tm.Format(sample)
 }
 
-// TimeHuman 给人类看的时间
+// TimeHuman time for humans to see
 func TimeHuman(ts interface{}) string {
 	var t int64
 	switch ts.(type) {
@@ -64,31 +64,31 @@ func TimeHuman(ts interface{}) string {
 			y := days / 365
 			d := days % 365
 			if d == 0 {
-				return strconv.Itoa(y) + "年前"
+				return strconv.Itoa(y) + " years ago"
 			}
-			return strconv.Itoa(y) + "年" + strconv.Itoa(d) + "天前"
+			return strconv.Itoa(y) + " year " + strconv.Itoa(d) + " days ago"
 		case days >= 30:
 			m := days / 30
 			d := days % 30
 			if d == 0 {
-				return strconv.Itoa(m) + "月前"
+				return strconv.Itoa(m) + " months ago"
 			}
-			return strconv.Itoa(m) + "月" + strconv.Itoa(d) + "天前"
+			return strconv.Itoa(m) + " month " + strconv.Itoa(d) + " days ago"
 		case days >= 7:
 			w := days / 7
 			d := days % 7
 			if d == 0 {
-				return strconv.Itoa(w) + "周前"
+				return strconv.Itoa(w) + " weeks ago"
 			}
-			return strconv.Itoa(w) + "周" + strconv.Itoa(d) + "天前"
+			return strconv.Itoa(w) + " week " + strconv.Itoa(d) + " days ago"
 		case days >= 1:
 			h := int(hours) % 24
 			if h == 0 {
-				return strconv.Itoa(days) + "天前"
+				return strconv.Itoa(days) + " days ago"
 			}
-			return strconv.Itoa(days) + "天" + strconv.Itoa(h) + "小时前"
+			return strconv.Itoa(days) + " day " + strconv.Itoa(h) + " hours ago"
 		default:
-			return "1天前"
+			return "1 day ago"
 		}
 	}
 
@@ -98,17 +98,17 @@ func TimeHuman(ts interface{}) string {
 		h := int(seconds / 3600)
 		m := int(seconds) % 3600
 		if m == 0 {
-			return strconv.Itoa(h) + "小时前"
+			return strconv.Itoa(h) + " hours ago"
 		}
-		return strconv.Itoa(h) + "小时" + strconv.Itoa(m) + "分前"
+		return strconv.Itoa(h) + " hour " + strconv.Itoa(m) + " minutes ago"
 	case seconds >= 60:
 		m := int(seconds / 60)
 		s := int(seconds) % 60
 		if s == 0 {
-			return strconv.Itoa(m) + "分钟前"
+			return strconv.Itoa(m) + " minutes ago"
 		}
-		return strconv.Itoa(m) + "分" + strconv.Itoa(s) + "秒前"
+		return strconv.Itoa(m) + " min " + strconv.Itoa(s) + " seconds ago"
 	}
 
-	return "刚刚"
+	return "just now"
 }

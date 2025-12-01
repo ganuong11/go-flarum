@@ -9,20 +9,20 @@ import (
 	"gorm.io/gorm"
 )
 
-// ISQLLoader dict结果的loader
+// ISQLLoader loader for dict results
 type ISQLLoader interface {
 	LoadDictData(map[string]interface{})
 }
 
-// rowsClose scan没有结束或是没有进行scan操作时, 需要手动释放连接
+// rowsClose When scan is not finished or scan operation is not performed, need to manually release the connection
 func rowsClose(rows *sql.Rows) {
 	if rows != nil {
 		rows.Close()
 	}
 }
 
-// clearGormTransaction gorm的事务清理
-// 使用方式:
+// clearGormTransaction gorm transaction cleanup
+// Usage:
 // tx := gormDB.Begin()
 // defer clearGormTransaction(tx)
 func clearGormTransaction(tx *gorm.DB) {
@@ -38,7 +38,7 @@ func clearTransaction(tx *sql.Tx) {
 	}
 }
 
-// dataGetByRows 从数据库返回结果中获取数据, 解析成为dict的形式
+// dataGetByRows Get data from database return results, parse into dict form
 func dataGetByRows(rows *sql.Rows) ([]map[string]interface{}, error) {
 	columns, err := rows.Columns()
 	if err != nil {

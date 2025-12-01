@@ -26,17 +26,17 @@ type replyFilter struct {
 	Limit uint64
 	IDS   []uint64
 
-	RenderLimit uint64 // 当前页面会显示的评论数量, 一般只显示几条
+	RenderLimit uint64 // The number of comments displayed on the current page, generally only a few
 
 	LastReadPostNumber uint64
 	NearNumber         uint64
 	StartNumber        uint64
 }
 
-// 获取评论的信息
-// eArticle: 获取一条帖子下方的评论信息
-// eUserPost: 获取用户的最新评论
-// ePost: 获取一条评论信息
+// Get comment information
+// eArticle: Get comment information below a post
+// eUserPost: Get the user's latest comments
+// ePost: Get one comment information
 func createFlarumPostAPIDoc(
 	reqctx *ReqContext,
 	gormDB *gorm.DB, redisDB *redis.Client,
@@ -53,19 +53,19 @@ func createFlarumPostAPIDoc(
 	siteInfo := model.GetSiteInfo(redisDB)
 
 	rf.RenderLimit = 20
-	// 当前全部的评论资源: 数据库中得到
+	// Current all comment resources: obtained from database
 	// var comments []model.CommentListItem
 	var comments []model.Comment
-	// 当前全部的评论资源: API返回
+	// Current all comment resources: API return
 	var flarumPosts []flarum.Resource
 
-	// 所有分类的信息, 用于整个站点的信息
+	// Information of all categories, used for the entire site information
 	var flarumTags []flarum.Resource
 
-	// 当前的话题信息
+	// Current topic information
 	var curDisscussion *flarum.Resource
 
-	// 使用startNumber时, 多加载一部分数据
+	// When using startNumber, load more data
 	if rf.StartNumber < 10 {
 		rf.StartNumber = 1
 	} else {
@@ -73,13 +73,13 @@ func createFlarumPostAPIDoc(
 	}
 	logger.Debugf("Get comments with filter: %+v", rf)
 
-	if rf.FT == eArticle { // 获取一个帖子的所有评论
+	if rf.FT == eArticle { // Get all comments of a post
 		comments, err = model.SQLCommentListByTopic(gormDB, redisDB, rf.AID, rf.Limit, tz)
 	} else if rf.FT == ePost {
 		comments, err = model.SQLCommentListByCID(gormDB, redisDB, rf.CID, rf.Limit, tz)
 	} else if rf.FT == eUserPost {
 		comments, err = model.SQLCommentListByUser(gormDB, redisDB, rf.UID, rf.Limit, tz)
-	} else if rf.FT == ePosts { // 根据post列表获取评论
+	} else if rf.FT == ePosts { // Get comments based on post list
 		comments, err = model.SQLCommentListByList(gormDB, redisDB, rf.IDS, tz)
 		rf.RenderLimit = uint64(len(rf.IDS))
 	} else {
@@ -96,32 +96,32 @@ func createFlarumPostAPIDoc(
 		logger.Errorf("Can't get any comment for %d", rf.AID)
 	}
 
-	// 获取恰当的commentsLen值
+	// Get the proper commentsLen value
 	if commentsLen < rf.RenderLimit {
 		// logger.Warning("Can't get proper comments for", rf.AID)
 		rf.RenderLimit = commentsLen
 	}
 
-	if rf.AID == 0 && commentsLen != 0 { // 没有AID时, 进行补充
+	if rf.AID == 0 && commentsLen != 0 { // When there is no AID, supplement
 		rf.AID = comments[0].AID
 	}
 
-	allUsers := make(map[uint64]bool)       // 用于保存已经添加的用户, 进行去重
-	allDiscussions := make(map[uint64]bool) // 用于保存已经添加的帖子, 进行去重
+	allUsers := make(map[uint64]bool)       // Used to save already added users, deduplicate
+	allDiscussions := make(map[uint64]bool) // Used to save already added posts, deduplicate
 
-	// 添加当前用户, 以及session信息
+	// Add current user, and session information
 	if currentUser != nil {
 		user := model.FlarumCreateCurrentUser(*currentUser)
 		allUsers[user.GetID()] = true
 		coreData.AddCurrentUser(user)
-		if !inAPI { // 做API请求时, 不更新csrf信息, 反之则进行更新
+		if !inAPI { // When making API request, do not update csrf information, otherwise update
 			coreData.AddSessionData(user, currentUser.RefreshCSRF(redisDB))
 		}
 	}
 
 	hasUpdateComments := make(chan bool)
 
-	// 针对某个话题时, 这里直接进行添加
+	// For a certain topic, add directly here
 	for rf.FT == eArticle || rf.FT == ePost || rf.FT == ePosts {
 		article, err := model.SQLArticleGetByID(gormDB, redisDB, rf.AID)
 		logger.Debugf("Get article for %s", article.GetFormatedString())
@@ -134,7 +134,7 @@ func createFlarumPostAPIDoc(
 		curDisscussion = &diss
 		apiDoc.AppendResources(*curDisscussion)
 		allDiscussions[rf.AID] = true
-		if rf.FT == eArticle || rf.FT == ePost { // 查询当前帖子的信息时, 更新redis中的帖子的评论信息, ePost为刚刚添加帖子的操作
+		if rf.FT == eArticle || rf.FT == ePost { // When querying the current post information, update the post's comment information in redis, ePost is the operation of just adding the post
 			go article.CacheCommentList(redisDB, comments, hasUpdateComments)
 		}
 
@@ -153,17 +153,17 @@ func createFlarumPostAPIDoc(
 	}())
 
 	for _, comment := range comments {
-		// lastReadPostNumber只用于记录读取到的位置, 不需要返回评论信息
+		// lastReadPostNumber is only used to record the read position, no need to return comment information
 		if rf.LastReadPostNumber != 0 {
 			break
 		}
 
-		// 使用lastReadPostNumber来标记起始位置
+		// Use lastReadPostNumber to mark the starting position
 		if rf.StartNumber != 0 && comment.Number < rf.StartNumber {
 			continue
 		}
 
-		// 使用renderlimit 标记结束位置
+		// Use renderlimit to mark the end position
 		if rf.RenderLimit == 0 {
 			break
 		}
@@ -189,7 +189,7 @@ func createFlarumPostAPIDoc(
 			allDiscussions[comment.AID] = true
 		}
 
-		// 处理用户的like信息
+		// Process user's like information
 		for _, userID := range comment.Likes {
 			if _, ok := allUsers[userID]; !ok {
 				u, err := model.SQLUserGetByID(gormDB, userID)
@@ -211,9 +211,9 @@ func createFlarumPostAPIDoc(
 		rf.RenderLimit--
 	}
 
-	// 针对当前的话题, 补全其关系信息
+	// For the current topic, complete its relationship information
 	if curDisscussion != nil {
-		if rf.FT == eArticle || rf.FT == ePost { // 如果是查询全部评论, 等待一下
+		if rf.FT == eArticle || rf.FT == ePost { // If querying all comments, wait a bit
 			<-hasUpdateComments
 		}
 		article, _ := model.SQLArticleGetByID(gormDB, redisDB, rf.AID)
@@ -221,7 +221,7 @@ func createFlarumPostAPIDoc(
 		curDisscussion.BindRelations("Posts", postRelation)
 	}
 
-	// 添加当前站点信息
+	// Add current site information
 	tags, err := model.SQLGetTags(gormDB)
 	if err != nil {
 		logger.Error("Get all categories error", err)
@@ -238,15 +238,15 @@ func createFlarumPostAPIDoc(
 	))
 
 	if rf.FT == eArticle {
-		// apiDoc.SetData(flarumPosts) // 主要信息为全部评论
+		// apiDoc.SetData(flarumPosts) // Main information is all comments
 		if rf.NearNumber != 0 {
-			apiDoc.SetData(flarumPosts) // 主要信息为全部评论
+			apiDoc.SetData(flarumPosts) // Main information is all comments
 		} else {
 			// if inAPI {
-			// 	apiDoc.SetData(flarumPosts) // 主要信息为当前帖子
+			// 	apiDoc.SetData(flarumPosts) // Main information is the current post
 			// } else {
 			// }
-			apiDoc.SetData(*curDisscussion) // 主要信息为当前帖子
+			apiDoc.SetData(*curDisscussion) // Main information is the current post
 		}
 	} else if rf.FT == ePost {
 		// comment, err := model.SQLGetCommentByID(   redisDB, rf.CID, tz)
@@ -256,10 +256,10 @@ func createFlarumPostAPIDoc(
 		// commentListItem := model.CommentListItem{Comment: comment}
 		// post := model.FlarumCreatePost(commentListItem, currentUser)
 		if len(flarumPosts) >= 0 {
-			apiDoc.SetData(flarumPosts[0]) // 主要信息为这条评论
+			apiDoc.SetData(flarumPosts[0]) // Main information is this comment
 		}
 	} else if rf.FT == eUserPost || rf.FT == ePosts {
-		apiDoc.SetData(flarumPosts) // 主要信息为全部评论
+		apiDoc.SetData(flarumPosts) // Main information is all comments
 	}
 	logger.Debugf("Update the api doc: %+v", apiDoc)
 	// apiDoc.Links["first"] = "https://flarum.yjzq.fun/api/v1/flarum/discussions?sort=&page%5Blimit%5D=20"
@@ -269,7 +269,7 @@ func createFlarumPostAPIDoc(
 	return coreData, nil
 }
 
-// FlarumAPICreatePost flarum进行评论的接口
+// FlarumAPICreatePost flarum interface for commenting
 func FlarumAPICreatePost(w http.ResponseWriter, r *http.Request) {
 	ctx := GetRetContext(r)
 	h := ctx.h
@@ -298,12 +298,12 @@ func FlarumAPICreatePost(w http.ResponseWriter, r *http.Request) {
 	reply := PostedReply{}
 	err := json.NewDecoder(r.Body).Decode(&reply)
 	if err != nil {
-		h.flarumErrorMsg(w, "解析json错误:"+err.Error())
+		h.flarumErrorMsg(w, "Parse json error:"+err.Error())
 		return
 	}
 	aid, err := strconv.ParseUint(reply.Data.Relationships.Discussion.Data.ID, 10, 64)
 	if err != nil {
-		h.flarumErrorMsg(w, "无法获取正确的帖子信息:"+err.Error())
+		h.flarumErrorMsg(w, "Unable to get correct post information:"+err.Error())
 		return
 	}
 
@@ -321,7 +321,7 @@ func FlarumAPICreatePost(w http.ResponseWriter, r *http.Request) {
 	comment.Content = model.PreProcessUserMention(h.App.GormDB, redisDB, scf.TimeZone, comment.Content)
 
 	if ok, err := comment.CreateFlarumComment(h.App.GormDB); !ok {
-		h.flarumErrorMsg(w, "创建评论出现错误:"+err.Error())
+		h.flarumErrorMsg(w, "Error creating comment:"+err.Error())
 		return
 	}
 
@@ -334,15 +334,15 @@ func FlarumAPICreatePost(w http.ResponseWriter, r *http.Request) {
 
 	coreData, err := createFlarumPostAPIDoc(ctx, h.App.GormDB, redisDB, *h.App.Cf, rf, scf.TimeZone)
 	if err != nil {
-		h.flarumErrorMsg(w, "查询评论出现错误:"+err.Error())
+		h.flarumErrorMsg(w, "Error querying comment:"+err.Error())
 		return
 	}
 
 	h.jsonify(w, coreData.APIDocument)
 }
 
-// FlarumConfirmUserAndPost 确认当前的用户的评论信息
-// FIXME: 这个函数我只知道是在评论时, @其他用户时会调用这个接口, 但是接口具体的行为还不太了解
+// FlarumConfirmUserAndPost confirm the current user's comment information
+// FIXME: I only know that this function is called when commenting, @ other users, but I don't know the specific behavior of the interface
 func FlarumConfirmUserAndPost(w http.ResponseWriter, r *http.Request) {
 	ctx := GetRetContext(r)
 	h := ctx.h
@@ -356,29 +356,29 @@ func FlarumConfirmUserAndPost(w http.ResponseWriter, r *http.Request) {
 
 	// filterData := strings.Split(_filter, "#")
 	// if len(filterData) != 2 {
-	// 	h.flarumErrorJsonify(w, createSimpleFlarumError("给定的回复信息有误"))
+	// 	h.flarumErrorJsonify(w, createSimpleFlarumError("The given reply information is incorrect"))
 	// 	return
 	// }
 
 	// pageLimit, err := strconv.ParseUint(_pageLimit, 10, 64)
 	// if err != nil {
 	// 	logger.Error(err)
-	// 	h.flarumErrorJsonify(w, createSimpleFlarumError("页面限制信息给定错误"))
+	// 	h.flarumErrorJsonify(w, createSimpleFlarumError("Page limit information given error"))
 	// 	return
 	// }
 
 	// postID, err := strconv.ParseUint(filterData[1], 10, 64)
 	// if err != nil {
 	// 	logger.Error(err)
-	// 	h.flarumErrorJsonify(w, createSimpleFlarumError(fmt.Sprintf("无法解析评论信息: %s", filterData)))
+	// 	h.flarumErrorJsonify(w, createSimpleFlarumError(fmt.Sprintf("Unable to parse comment information: %s", filterData)))
 	// 	return
 	// }
 	// comment := model.SQLGetCommentByID(   redisDB, postID, scf.TimeZone)
 	// if comment.UserName != filterData[0] {
-	// 	logger.Warningf("用户与评论信息不符合: %s", filterData)
+	// 	logger.Warningf("User and comment information do not match: %s", filterData)
 	// }
 	coreData := flarum.NewCoreData()
-	apiDoc := &coreData.APIDocument // 注意, 获取到的是指针
+	apiDoc := &coreData.APIDocument // Note: this returns a pointer
 
 	apiDoc.Links["first"] = scf.MainDomain + model.FlarumAPIPath + "/users?" +
 		fmt.Sprintf("filter%%5Bq%%5D=%s&page%%5Blimit%%5D=%s", url.QueryEscape(_filter), _pageLimit)
@@ -388,7 +388,7 @@ func FlarumConfirmUserAndPost(w http.ResponseWriter, r *http.Request) {
 	return
 }
 
-// FlarumPosts 获取评论
+// FlarumPosts get comments
 func FlarumPosts(w http.ResponseWriter, r *http.Request) {
 	ctx := GetRetContext(r)
 	logger := ctx.GetLogger()
@@ -514,14 +514,14 @@ func FlarumPosts(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// fmt.Println(userID, _type, _limit, _sort, limit, user, comments)
-	// 如果是API直接进行返回
+	// If it is an API request, return directly
 	if inAPI {
 		h.jsonify(w, coreData.APIDocument)
 		return
 	}
 }
 
-// FlarumPostsUtils 对于评论的一些操作
+// FlarumPostsUtils some operations on comments
 func FlarumPostsUtils(w http.ResponseWriter, r *http.Request) {
 	var err error
 	ctx := GetRetContext(r)
@@ -537,11 +537,11 @@ func FlarumPostsUtils(w http.ResponseWriter, r *http.Request) {
 	redisDB := h.App.RedisDB
 	cobj, err := model.SQLCommentByID(h.App.GormDB, redisDB, cid, h.App.Cf.Site.TimeZone)
 	if err != nil {
-		h.flarumErrorJsonify(w, createSimpleFlarumError("无法获取评论"))
+		h.flarumErrorJsonify(w, createSimpleFlarumError("Unable to get comment"))
 		return
 	}
 
-	// 用户所做的操作
+	// User performed actions
 	type CommentUtils struct {
 		Data struct {
 			ID         string `json:"id"`
@@ -583,5 +583,5 @@ func FlarumPostsUtils(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.flarumErrorJsonify(w, createSimpleFlarumError("此接口仅在API中使用"))
+	h.flarumErrorJsonify(w, createSimpleFlarumError("This interface is only used in API"))
 }

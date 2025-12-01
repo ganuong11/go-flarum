@@ -164,7 +164,7 @@ func (article *Topic) GetWeight(redisDB *redis.Client) float64 {
 	// 		editTime = time.Unix(now.Unix()-2*24*3600, 0)
 	// 	}
 	// }
-	// if article.ClickCnt == 0 { // 避免出现0的情况
+	// if article.ClickCnt == 0 { // avoid zero click count
 	// 	article.ClickCnt = 1
 	// }
 	// qAge := now.Sub(editTime).Hours()

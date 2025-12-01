@@ -24,7 +24,7 @@ func SetCaptchaUseRedisStore(redisDB *redis.Client) {
 	})
 }
 
-// NewCaptcha 产生新的验证码图片
+// NewCaptcha produce a new captcha image
 func NewCaptcha(path string) string {
 	captchaID := captcha.New()
 	SaveImage(path, captchaID)
@@ -62,7 +62,7 @@ func SaveImage(path, id string) {
 
 	f, err := os.Create(savePath)
 
-	if util.CheckError(err, "保存验证码") {
+	if util.CheckError(err, "save captcha") {
 		return
 	}
 

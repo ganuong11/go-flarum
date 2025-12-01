@@ -35,7 +35,7 @@ type Application struct {
 	Sc *securecookie.SecureCookie
 	// QnZone  *storage.Zone
 	Logger *logging.Logger
-	Rand   *rand.Rand // 负责处理随机数
+	Rand   *rand.Rand // responsible for random number generation
 	GormDB *gorm.DB
 }
 

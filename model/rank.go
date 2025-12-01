@@ -14,12 +14,12 @@ import (
 	"strconv"
 )
 
-// WeightAble 可以获取权值的一种结构
+// WeightAble is a structure that can get weight
 type WeightAble interface {
 	GetWeight() uint64
 }
 
-// ArticleRankItem 记录每个话题的权重
+// ArticleRankItem records the weight of each topic
 type ArticleRankItem struct {
 	AID     uint64 `json:"a_id"`
 	Weight  uint64
@@ -27,18 +27,18 @@ type ArticleRankItem struct {
 	RedisDB *redis.Client
 }
 
-// CategoryRankData 一个分类下的排序数据
+// CategoryRankData sorting data under a category
 type CategoryRankData struct {
 	CID       uint64     `json:"c_id"`
-	mtx       sync.Mutex // 同一时刻, 只允许一个协程操纵该分类的记录
-	maxID     uint64     // 数据库游标, 记录当前已读取数据的最大值, 从数据库中读取新的数据时使用
+	mtx       sync.Mutex // At the same time, only one goroutine is allowed to manipulate the records of this category
+	maxID     uint64     // Database cursor, records the maximum value of currently read data, used when reading new data from the database
 	topicData []ArticleRankItem
 }
 
-// RankMap time to live map
+// RankMap TTL map
 type RankMap struct {
 	m       map[uint64]*CategoryRankData
-	mtx     sync.Mutex // 同一时刻, 只允许一个协程操纵map
+	mtx     sync.Mutex // At the same time, only one goroutine is allowed to manipulate the map
 	GormDB  *gorm.DB
 	SQLDB   *sql.DB
 	RedisDB *redis.Client
@@ -46,7 +46,7 @@ type RankMap struct {
 
 func getWeight(rankMap *RankMap, aid uint64) float64 {
 	// topic, err := SQLArticleGetByID(rankMap.GormDB, rankMap.SQLDB, rankMap.RedisDB, aid)
-	// if util.CheckError(err, "查询帖子") {
+	// if util.CheckError(err, "Query post") {
 	// 	return 0
 	// }
 	// return topic.GetWeight(
@@ -64,46 +64,46 @@ func cid2Key(cid uint64) string {
 	return fmt.Sprintf("rank-category-%d", cid)
 }
 
-// TimelyResort 刷新Redis数据库中每个帖子的权重
+// TimelyResort refreshes each post's weight in Redis
 func TimelyResort() {
-	// 刷新所有节点的排序
+	// Refresh topics for all categories
 	categoryList, err := SQLGetTags(rankMap.GormDB)
 	logger := util.GetLogger()
-	if util.CheckError(err, "获取所有节点") {
+	if util.CheckError(err, "Get all nodes") {
 		return
 	}
-	categoryList = append(categoryList, Tag{ID: 0, Name: "所有节点"})
+	categoryList = append(categoryList, Tag{ID: 0, Name: "All nodes"})
 
 	for _, v := range categoryList {
 		logger.Debugf("Start refresh category %d(%s)", v.ID, v.Name)
 
-		// 删除redis中所有无效的帖子
+		// Remove invalid posts from Redis
 		sqlDataDel, err := sqlGetAllArticleWithCID(v.ID, false)
-		if util.CheckError(err, fmt.Sprintf("获取%d节点下的无效的帖子列表", v.ID)) {
+		if util.CheckError(err, fmt.Sprintf("Get the list of invalid posts under node %d", v.ID)) {
 			return
 		}
 		for _, t := range sqlDataDel {
 			_, err := rankRedisDB.ZRem(cid2Key(v.ID), fmt.Sprintf("%d", t.ID)).Result()
 			logger.Debug("Delete not active topic", t.ID)
-			util.CheckError(err, "删除无效帖子")
+			util.CheckError(err, "Delete invalid posts")
 		}
 
-		// 将所有有效帖子更新至redis数据库中
+		// Update all valid posts to Redis
 		sqlDataAdd, err := sqlGetAllArticleWithCID(v.ID, true)
-		if util.CheckError(err, fmt.Sprintf("获取%d节点下的有效的帖子列表", v.ID)) {
+		if util.CheckError(err, fmt.Sprintf("Get the list of valid posts under node %d", v.ID)) {
 			return
 		}
 
-		// 	首先从数据库中获取所有有效的ID
+		//     First fetch valid IDs from DB
 		for _, t := range sqlDataAdd {
 			_, err := rankRedisDB.ZAddNX(cid2Key(v.ID), &redis.Z{
 				Score:  getWeight(rankMap, t.ID),
 				Member: fmt.Sprintf("%d", t.ID)},
 			).Result()
-			util.CheckError(err, "更新当前帖子")
+			util.CheckError(err, "Update current post")
 		}
 
-		// 刷新权重
+		// Refresh weights
 		rdsData, _ := rankRedisDB.ZRevRange(cid2Key(v.ID), 0, -1).Result()
 		for _, topicID := range rdsData {
 			aid, _ := strconv.ParseUint(topicID, 10, 64)
@@ -141,7 +141,7 @@ func min(a, b uint64) uint64 {
 	return b
 }
 
-// GetTopicListByPageNum 通过给定的页码查找话题的ID值
+// GetTopicListByPageNum finds the ID values of topics through the given page number
 func GetTopicListByPageNum(cid uint64, page uint64, limit uint64) []uint64 {
 	var retData []uint64
 
@@ -155,14 +155,14 @@ func GetTopicListByPageNum(cid uint64, page uint64, limit uint64) []uint64 {
 	return retData
 }
 
-// AddNewArticleList 为某个分类添加话题
+// AddNewArticleList adds topics to a certain category
 func AddNewArticleList(cid uint64, rankItems []ArticleRankItem) {
 	m := GetRankMap()
-	if _, ok := m.m[cid]; !ok { // 同一时刻只允许一个协程操作
+	if _, ok := m.m[cid]; !ok { // At the same time, only one goroutine may operate
 		func() {
 			m.mtx.Lock()
 			defer m.mtx.Unlock()
-			if _, ok := m.m[cid]; !ok { // 二次检查
+			if _, ok := m.m[cid]; !ok { // double-check
 				m.m[cid] = &CategoryRankData{CID: cid}
 			}
 		}()
@@ -184,12 +184,12 @@ func AddNewArticleList(cid uint64, rankItems []ArticleRankItem) {
 	func() {
 		crd.mtx.Lock()
 		defer crd.mtx.Unlock()
-		crd.topicData = append(crd.topicData, rankItems...) // 直接加入, 不做任何处理
+		crd.topicData = append(crd.topicData, rankItems...) // Directly add, without any processing
 		crd.maxID = maxID
 	}()
 }
 
-// GetCIDArticleMax 获取当前分类的偏移值
+// GetCIDArticleMax gets the offset value of the current category
 func GetCIDArticleMax(cid uint64) uint64 {
 	m := GetRankMap()
 	if _, ok := m.m[cid]; ok {

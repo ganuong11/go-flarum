@@ -36,7 +36,7 @@ type User struct {
 
 	Description string
 	WebSite     string
-	// Reputation  uint64 `json:"reputation"` // 声望值
+	// Reputation  uint64 `json:"reputation"` // reputation
 
 	// Preferences *flarum.Preferences `gorm:"foreignKey:PreferencesRefer"`
 	Preferences []byte

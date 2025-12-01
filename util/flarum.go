@@ -16,7 +16,7 @@ func isValidFilename(filename string) bool {
 
 func recursiveRead(localeData map[string]interface{}, prefix string, localeDataArr *map[string]string) {
 	logger := GetLogger()
-	// 递归的获取信息
+	// Recursively get information
 	for key, element := range localeData {
 
 		switch v := element.(type) {
@@ -69,7 +69,7 @@ func readLocaleData(localeData map[string]interface{}, localeDataArr *map[string
 	}
 }
 
-// FlarumReadLocale 读取Flarum的语言包
+// FlarumReadLocale reads Flarum's language pack
 func FlarumReadLocale(flarumDir string, extDirs []string, localeDir, locale string) map[string]string {
 	logger := GetLogger()
 	localeDataArr := make(map[string]string)
@@ -90,18 +90,18 @@ func FlarumReadLocale(flarumDir string, extDirs []string, localeDir, locale stri
 	}
 
 	// flarum/locale
-	// 首先解析flarum中自带的语言包
+	// First parse the built-in language pack in flarum
 	flarumDatas, err := os.ReadDir(path.Join(flarumDir, "locale"))
 	if err == nil {
 		for _, fi := range flarumDatas {
-			// 过滤指定格式
+			// Filter specified format
 			if ok := isValidFilename(fi.Name()); ok {
 				doParseFile(path.Join(flarumDir, "locale", fi.Name()))
 			}
 		}
 	}
 
-	// 解析flarum-lang中携带的语言包
+	// Parse the language pack carried in flarum-lang
 	// locale/en/*.yml, locale/zh/*.yml
 	dirPath := path.Join(localeDir, locale, "locale")
 	dir, err := os.ReadDir(dirPath)
@@ -110,13 +110,13 @@ func FlarumReadLocale(flarumDir string, extDirs []string, localeDir, locale stri
 		return localeDataArr
 	}
 	for _, fi := range dir {
-		// 过滤指定格式
+		// Filter specified format
 		if ok := isValidFilename(fi.Name()); ok {
 			doParseFile(path.Join(dirPath, fi.Name()))
 		}
 	}
 
-	// 解析各个插件的语言包
+	// Parse the language packs of each plugin
 	// flarum-tags/en/xxx.yml
 	for _, extDir := range extDirs {
 		extDirDatas, err := os.ReadDir(extDir)
@@ -135,7 +135,7 @@ func FlarumReadLocale(flarumDir string, extDirs []string, localeDir, locale stri
 				continue
 			}
 			for _, fi := range dir {
-				// 过滤指定格式
+				// Filter specified format
 				if ok := isValidFilename(fi.Name()); ok {
 					doParseFile(path.Join(extDir, fi.Name()))
 				}
@@ -162,7 +162,7 @@ func FlarumReadLocale(flarumDir string, extDirs []string, localeDir, locale stri
 			}
 
 			for _, fi := range dir {
-				// 过滤指定格式
+				// Filter specified format
 				if ok := isValidFilename(fi.Name()); ok {
 					doParseFile(path.Join(extLocaleDir, fi.Name()))
 				}
@@ -189,7 +189,7 @@ func FlarumReadLocale(flarumDir string, extDirs []string, localeDir, locale stri
 			}
 
 			for _, fi := range dir {
-				// 过滤指定格式
+				// Filter specified format
 				if ok := isValidFilename(fi.Name()); ok {
 					doParseFile(path.Join(extLocaleDir, fi.Name()))
 				}

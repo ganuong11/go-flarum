@@ -1,7 +1,5 @@
 package extensions
 
-
-// ExtCaptcha 验证码对应的库
+// ExtCaptcha captcha related extension
 type ExtCaptcha struct {
-
 }

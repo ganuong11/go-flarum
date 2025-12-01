@@ -11,7 +11,7 @@ import (
 type (
 	// xml to struct https://www.onlinetool.io/xmltogo/
 
-	// USERMENTION 引用用户
+	// USERMENTION refers to user
 	USERMENTION struct {
 		XMLName     xml.Name `xml:"USERMENTION"`
 		Text        string   `xml:",chardata"`
@@ -20,7 +20,7 @@ type (
 		Username    string   `xml:"username,attr"`
 	}
 
-	// POSTMENTION 引用评论
+	// POSTMENTION refers to a post/comment
 	POSTMENTION struct {
 		XMLName      xml.Name `xml:"POSTMENTION"`
 		Text         string   `xml:",chardata"`
@@ -31,7 +31,7 @@ type (
 		Username     string   `xml:"username,attr"`
 	}
 
-	// USERHTMLTag 引用用户的tag
+	// USERHTMLTag refers to user HTML tag
 	USERHTMLTag struct {
 		XMLName xml.Name `xml:"a"`
 		Text    string   `xml:",chardata"`
@@ -39,7 +39,7 @@ type (
 		Class   string   `xml:"class,attr"`
 	}
 
-	// POSTHTMLTag  引用其他评论的tag
+	// POSTHTMLTag refers to post HTML tag
 	POSTHTMLTag struct {
 		XMLName xml.Name `xml:"a"`
 		Text    string   `xml:",chardata"`
@@ -49,11 +49,11 @@ type (
 	}
 )
 
-// @"corvofeng"#p15 针对15楼的回复
-// <r><p><POSTMENTION discussionid="1" displayname="corvofeng" id="15" number="13">@"corvofeng"#p15</POSTMENTION> 针对15楼的回复</p></r>
+// @"corvofeng"#p15 reply to post #15
+// <r><p><POSTMENTION discussionid="1" displayname="corvofeng" id="15" number="13">@"corvofeng"#p15</POSTMENTION> reply to post #15</p></r>
 
-// @"corvofeng"#1 针对corvofeng的回复
-// <r><p><USERMENTION displayname="corvofeng" id="1">@corvofeng</USERMENTION> 针对corvofeng的回复</p></r>
+// @"corvofeng"#1 reply to user corvofeng
+// <r><p><USERMENTION displayname="corvofeng" id="1">@corvofeng</USERMENTION> reply to user corvofeng</p></r>
 
 func makeMention(mentionStr []string, comment Comment, user User) string {
 	logger := util.GetLogger()
@@ -61,7 +61,7 @@ func makeMention(mentionStr []string, comment Comment, user User) string {
 	for {
 		userName := mentionStr[1]
 		commentID := mentionStr[2]
-		if userName != user.Name { // 确保用户信息正确
+		if userName != user.Name { // ensure username matches
 			logger.Warning("Can't process mention with correct name", mentionStr[0])
 			break
 		}

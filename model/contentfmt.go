@@ -60,7 +60,7 @@ func genYoutube(url string) string {
 	)
 }
 
-// ContentFmt 处理markdown样式
+// ContentFmt Process markdown style
 func ContentFmt(input string) string {
 	return ContentRich(input)
 }
@@ -84,20 +84,20 @@ func mdToHTML(md []byte) []byte {
 	return markdown.Render(doc, renderer)
 }
 
-// ContentRich 用来转换文本, 转义以及允许用户添加一些富文本样式
-// 该函数效率奇差, 但不会优化
+// ContentRich Used to convert text, escape and allow users to add some rich text styles
+// This function is extremely inefficient, but will not be optimized
 func ContentRich(input string) string {
 	input = strings.TrimSpace(input)
 	htmlFlags := html.CommonFlags | html.HrefTargetBlank | html.Safelink
 	opts := html.RendererOptions{Flags: htmlFlags}
 	renderer := html.NewRenderer(opts)
 
-	replaceDict := make(map[string]string) // 用来记录使用了uuid替换的数据的具体值
+	replaceDict := make(map[string]string) // Used to record the original content replaced by UUIDs
 
-	// 处理mention信息
-	// 首先获取应该被识别的mention信息
-	// 参考: https://stackoverflow.com/a/39102969
-	if strings.Contains(input, "USERMENTION") || strings.Contains(input, "POSTMENTION") { // flarum 的mention
+	// Process mention information
+	// First get the mention information that should be recognized
+	// Reference: https://stackoverflow.com/a/39102969
+	if strings.Contains(input, "USERMENTION") || strings.Contains(input, "POSTMENTION") { // flarum mention
 		mentionDict := make(map[string]string)
 		for _, m := range flarumMentionRegexp.FindAllString(input, -1) {
 			uid := util.GetUUID()
@@ -112,7 +112,7 @@ func ContentRich(input string) string {
 		bilibiliDict := make(map[string]string)
 		bilibliRegexp := regexp.MustCompile(`<iframe src="(//player.bilibili.com[^"^\n]*)"[a-zA-Z0-9 ="]*>\s*</iframe>`)
 		bilibiliURLRegexp := regexp.MustCompile(`(//player.bilibili.com[^"^\n]*)\n`)
-		input = bilibliRegexp.ReplaceAllString(input, "$1\n") // 将原有的iframe包裹的块剥离开来
+		input = bilibliRegexp.ReplaceAllString(input, "$1\n") // Strip out the original iframe-wrapped blocks
 		for _, m := range bilibiliURLRegexp.FindAllString(input, -1) {
 			m = strings.TrimSuffix(m, "\n")
 			uid := util.GetUUID()
@@ -143,7 +143,7 @@ func ContentRich(input string) string {
 	if strings.Contains(input, "://www.youtube.com") {
 		youtubeDict := make(map[string]string)
 		youtubeRegexp := regexp.MustCompile(`<iframe.*src="((https:)?//www.youtube.com[^"]*)".*>\s*</iframe>`)
-		input = youtubeRegexp.ReplaceAllString(input, "$1\n") // 将原有的iframe包裹的块剥离开来
+		input = youtubeRegexp.ReplaceAllString(input, "$1\n") // Strip out the original iframe-wrapped blocks
 		youtubeURLRegexp := regexp.MustCompile(`((https:)?//www.youtube.com[^"^\n]*)\n`)
 
 		for _, m := range youtubeURLRegexp.FindAllString(input, -1) {
@@ -157,13 +157,13 @@ func ContentRich(input string) string {
 			input = strings.ReplaceAll(input, k, v)
 		}
 	}
-	// 将原有的字符串中的<>全部进行转义
+	// Escape all <> in the original string
 	input = htmlEscape(input)
 
-	// 对markdown文本进行解析
+	// Parse markdown text
 	input = string(markdown.ToHTML([]byte(input), nil, renderer))
 
-	// 将原有被替换成uuid的内容进行恢复
+	// Restore the original content replaced with uuid
 	for k, v := range replaceDict {
 		input = strings.ReplaceAll(input, k, v)
 	}

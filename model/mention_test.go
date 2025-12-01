@@ -7,7 +7,7 @@ import (
 	"testing"
 )
 
-// 测试多个引用存在时的检查结果
+// Test the check result when multiple references exist
 func TestMentionGet(t *testing.T) {
 
 	mentionPost := Comment{}
@@ -28,7 +28,7 @@ func TestMentionGet(t *testing.T) {
 		{"@helloworld", mentionPost, user, `<USERMENTION displayname="nick" id="123" username="helloworld">@helloworld</USERMENTION>`},
 		{"@helloworld#86", mentionPost, user, `<POSTMENTION discussionid="13" displayname="nick" id="86" number="3" username="helloworld">@helloworld</POSTMENTION>`},
 		{"@helloworld#p86", mentionPost, user, `<POSTMENTION discussionid="13" displayname="nick" id="86" number="3" username="helloworld">@helloworld</POSTMENTION>`},
-		{"@\"helloworld\"#p86 这是一条at的评论", mentionPost, user, `<POSTMENTION discussionid="13" displayname="nick" id="86" number="3" username="helloworld">@helloworld</POSTMENTION>`},
+		{"@\"helloworld\"#p86 This is an at comment", mentionPost, user, `<POSTMENTION discussionid="13" displayname="nick" id="86" number="3" username="helloworld">@helloworld</POSTMENTION>`},
 		// {"@helloworld#54", mentionPost, user, `@helloworld#54`},
 	}
 	for _, data := range TESTCASES {
@@ -71,16 +71,16 @@ func TestMention(t *testing.T) {
 			`<POSTMENTION discussionid="13" displayname="nick" id="86" number="3" username="helloworld">@helloworld</POSTMENTION>`,
 		},
 		{
-			"@helloworld#86  测试输入 @helloworld#54",
+			"@helloworld#86  Test input @helloworld#54",
 			mentionPost,
 			user,
-			`<POSTMENTION discussionid="13" displayname="nick" id="86" number="3" username="helloworld">@helloworld</POSTMENTION>  测试输入 @helloworld#54`,
+			`<POSTMENTION discussionid="13" displayname="nick" id="86" number="3" username="helloworld">@helloworld</POSTMENTION>  Test input @helloworld#54`,
 		},
 		{
-			`@"helloworld"#p86 测试引用`,
+			`@"helloworld"#p86 Test mention`,
 			mentionPost,
 			user,
-			`<POSTMENTION discussionid="13" displayname="nick" id="86" number="3" username="helloworld">@helloworld</POSTMENTION> 测试引用`,
+			`<POSTMENTION discussionid="13" displayname="nick" id="86" number="3" username="helloworld">@helloworld</POSTMENTION> Test mention`,
 		},
 	}
 
@@ -127,7 +127,7 @@ func TestMentionRender(t *testing.T) {
 func TestFlarumMention(t *testing.T) {
 	flarumMentionRegexp = regexp.MustCompile(`&lt;(USER|POST)MENTION(.+?)MENTION&gt;`)
 
-	data := `&lt;USERMENTION displayname="corvofeng" id="87" username="corvofeng"&gt;@corvofeng&lt;/USERMENTION&gt;引用这条主题`
+	data := `&lt;USERMENTION displayname="corvofeng" id="87" username="corvofeng"&gt;@corvofeng&lt;/USERMENTION&gt; mentions this topic`
 	replDict := make(map[string]string)
 	for _, m := range flarumMentionRegexp.FindAllString(data, -1) {
 		oldData := m

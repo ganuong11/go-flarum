@@ -12,14 +12,14 @@ import (
 var loggerName = "yiqi"
 
 var (
-	// 本地变量
+	// Local variables
 	logger = logging.MustGetLogger(loggerName)
 	format = logging.MustStringFormatter(
 		`%{color}%{time:2006-01-02 15:04:05} ▶ %{level:.1s} [%{shortfile}] %{message}%{color:reset}`,
 	)
 )
 
-// InitLogger 初始化Logger, 未来可以使用文件进行初始化.
+// InitLogger initializes Logger, in the future can use file for initialization.
 func InitLogger(lvl string) {
 	backend := logging.NewLogBackend(os.Stdout, "", 0)
 	backendFormatter := logging.NewBackendFormatter(backend, format)
@@ -41,7 +41,7 @@ func InitLogger(lvl string) {
 	}
 }
 
-// CheckError error check, 检查到error, 返回true
+// CheckError error check, if error is detected, return true
 func CheckError(err error, info string) (res bool) {
 	if err != nil {
 		// Get the real file and line number
@@ -58,7 +58,7 @@ func CheckError(err error, info string) (res bool) {
 	return false
 }
 
-// GetLogger 全局使用的Logger
+// GetLogger globally used Logger
 func GetLogger() *logging.Logger {
 	return logger
 }

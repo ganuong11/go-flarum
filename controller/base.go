@@ -156,7 +156,7 @@ func (h *BaseHandler) Render(w http.ResponseWriter, tpl string, data interface{}
 			a, _ := json.Marshal(v)
 			return template.JS(a)
 		},
-		// 将html中的内容直接进行渲染
+		// Render the content in html directly
 		// https://stackoverflow.com/a/44222211
 		// https://stackoverflow.com/a/42055211
 		"safeHTML": func(str string) template.HTML {
@@ -177,7 +177,7 @@ func (h *BaseHandler) Render(w http.ResponseWriter, tpl string, data interface{}
 }
 
 // sp.HandleFunc(pat.Get("/d/:aid/:lrn"), ct.FlarumArticleDetail) // lastReadNumber
-// goji的Param会在没有变量时抛出异常, 因此进行catch处理
+// goji's Param will throw exception when there is no variable, so catch processing
 func (h *BaseHandler) safeGetParm(r *http.Request, parm string) (data string, err error) {
 	defer func() {
 		if r := recover(); r != nil {
@@ -189,28 +189,28 @@ func (h *BaseHandler) safeGetParm(r *http.Request, parm string) (data string, er
 	return data, nil
 }
 
-// jsonify 序列化结构体并进行返回
+// jsonify serialize struct and return
 func (h *BaseHandler) jsonify(w http.ResponseWriter, data interface{}) error {
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	return json.NewEncoder(w).Encode(data)
 }
 
-// flarumErrorJsonify flarum错误需要此函数进行返回
-// h.flarumErrorJsonify(w, createSimpleFlarumError("这是其中的错误"))
+// flarumErrorJsonify flarum error needs this function to return
+// h.flarumErrorJsonify(w, createSimpleFlarumError("This is the error in it"))
 func (h *BaseHandler) flarumErrorJsonify(w http.ResponseWriter, data FlarumErrorResponse) error {
 	w.WriteHeader(http.StatusUnprocessableEntity)
 	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	return json.NewEncoder(w).Encode(data)
 }
 
-// flarumErrorJsonify flarum错误需要此函数进行返回
-// h.flarumErrorJsonify(w, createSimpleFlarumError("这是其中的错误"))
+// flarumErrorJsonify flarum error needs this function to return
+// h.flarumErrorJsonify(w, createSimpleFlarumError("This is the error in it"))
 func (h *BaseHandler) flarumErrorMsg(w http.ResponseWriter, errMsg string) error {
 	return h.flarumErrorJsonify(w, createSimpleFlarumError(errMsg))
 }
 
-// CurrentUser 当前用户
-// 原有的策略是保存用户到文件中, 现在经过重新改写, 将从数据库中获取用户,
+// CurrentUser current user
+// The original strategy was to save users to files, now after rewriting, users will be obtained from the database,
 func (h *BaseHandler) CurrentUser(w http.ResponseWriter, r *http.Request) (user model.User, err error) {
 	logger := h.App.Logger
 	ssValue := h.GetCookie(r, "SessionID")
@@ -230,7 +230,7 @@ func (h *BaseHandler) CurrentUser(w http.ResponseWriter, r *http.Request) (user 
 	return user, nil
 }
 
-// SetCookie 浏览器设置cookie
+// SetCookie browser sets cookie
 func (h *BaseHandler) SetCookie(w http.ResponseWriter, name, value string, days int) error {
 	encoded, err := h.App.Sc.Encode(name, value)
 	if err != nil {
@@ -247,7 +247,7 @@ func (h *BaseHandler) SetCookie(w http.ResponseWriter, name, value string, days 
 	return err
 }
 
-// GetCookie 根据name获取当前所存的cookie值
+// GetCookie get the currently stored cookie value according to name
 func (h *BaseHandler) GetCookie(r *http.Request, name string) string {
 	if cookie, err := r.Cookie(name); err == nil {
 		var value string
@@ -258,7 +258,7 @@ func (h *BaseHandler) GetCookie(r *http.Request, name string) string {
 	return ""
 }
 
-// DelCookie 删除Cookie, 用户下线
+// DelCookie delete Cookie, user offline
 func (h *BaseHandler) DelCookie(w http.ResponseWriter, name string) {
 	if len(name) > 0 {
 		http.SetCookie(w, &http.Cookie{
@@ -272,14 +272,14 @@ func (h *BaseHandler) DelCookie(w http.ResponseWriter, name string) {
 	}
 }
 
-// CurrentTpl 当前使用的模板类型
+// CurrentTpl current template type used
 func (h *BaseHandler) CurrentTpl(r *http.Request) string {
 
 	return "flarum"
 }
 
-// GetLogger 获取当前的logger
-// TODO: 期望未来能按照用户进行日志打印
+// GetLogger get the current logger
+// TODO: Expect in the future to print logs according to users
 func (ctx *ReqContext) GetLogger() *logging.Logger {
 	return ctx.h.App.Logger
 }
