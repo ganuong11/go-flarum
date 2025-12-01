@@ -3,7 +3,7 @@ Main:
     HttpsPort: 443
     HttpsOn: false
     Domain: ""
-    DB: postgres
+    DB: postgres                # Database type: postgres / mysql / mongo
     MySQLURL: "root:password@tcp(mysql-db:3306)/flarum?charset=utf8mb4&parseTime=True"
     PostgresURL: "user=postgres password=p@ssw0rd dbname=flarum host=postgres-db port=5432 sslmode=disable"
     MongoURL: "mongodb://172.17.0.1"
@@ -18,6 +18,7 @@ Main:
     ServerName: "GoFlarum"
     CookieSecure: false
     CookieHttpOnly: true
+    true
     OldSiteDomain: ""
     TLSCrtFile: ""
     TLSKeyFile: ""
@@ -32,29 +33,31 @@ Main:
         UseSSL: false
         Path: "flarum"
         S3BaseURL: "https://xxx.com"
+
 Site:
     Name: "youBBS"
     Desc: "Yet another bbs in go"
     AdminEmail: ""
-    MainDomain: "http://127.0.0.1:8082"  # 主站对应的地址
-    CDNBaseURL: "/webpack" # 静态文件所对应的地址
+    MainDomain: "http://127.0.0.1:8082"          # Main site address of the site
+    CDNBaseURL: "/webpack"                       # Base URL for static resources (Webpack-built files)
     MainNodeIds: "1,2,3,4,5,6,7,8,9,10"
     AllowSignup: false
     TimeZone: 8
-    HomeShowNum: 20
-    TitleMaxLen: 180
-    ContentMaxLen: 9000
-    PostInterval: 60
-    CommentListNum: 10
-    CommentInterval: 20
-    Authorized: false
-    RegReview: false
-    CloseReg: false
+    8                          # UTC+8 (China Standard Time, etc.)
+    HomeShowNum: 20                              # Number of discussions shown on homepage
+    TitleMaxLen: 180                             # Maximum length of discussion titles
+    ContentMaxLen: 9000                          # Maximum length of post content
+    PostInterval: 60                             # Minimum seconds between creating new discussions
+    CommentListNum: 10                           # Number of comments per page
+    CommentInterval: 20                          # Minimum seconds between posting comments
+    Authorized: false                            # Whether the site is invite-only / private
+    RegReview: false                             # Whether new registrations need admin approval
+    CloseReg: false                              # Completely disable registration
     AutoDataBackup: false
-    AutoGetTag: true
+    AutoGetTag: true                             # Automatically extract tags from content
     GithubClientID: ""
     GithubClientSecret: ""
-    UploadSuffix: ""
-    UploadImgOnly: false
-    UploadImgResize: false
-    UploadMaxSize: 50
+    UploadSuffix: ""                             # Allowed file extensions (empty = any)
+    UploadImgOnly: false                         # Restrict uploads to images only
+    UploadImgResize: false                       # Automatically resize uploaded images
+    UploadMaxSize: 50                            # Maximum upload size in MB

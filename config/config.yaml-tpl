@@ -31,34 +31,34 @@ Main:
         UseSSL: false
         Path: "flarum"
         S3BaseURL: "https://xxx.com"
+
 Site:
-    Name: "Zoe测试"
+    Name: "Zoe Test"                          # Original: "Zoe测试"
     Desc: "zoe & ez"
-    WelcomeTitle: "用作测试"
-    WelcomeMessage: "这是一个简单的小站"
+    WelcomeTitle: "For testing purposes"       # Original: "用作测试"
+    WelcomeMessage: "This is a simple little site"  # Original: "这是一个简单的小站"
     AdminEmail: ""
-    MainDomain: "http://127.0.0.1:8082"  # 主站对应的地址
-    CDNBaseURL: "http://127.0.0.1:9000/webpack" # 静态文件所对应的地址
+    MainDomain: "http://127.0.0.1:8082"         # Address of the main site
+    CDNBaseURL: "http://127.0.0.1:9000/webpack" # Address for static files
     MainNodeIds: "1,2,3,4,5,6,7,8,9,10"
-    PageLimit: 20   # flarum原始代码中此值已经固定, 不要修改它
+    PageLimit: 20                              # This value is hard-coded in original Flarum, do not modify
     TimeZone: 8
     AllowSignup: false
     HomeShowNum: 20
     TitleMaxLen: 180
     ContentMaxLen: 9000
-    PostInterval: 60
+    PostInterval: 60                           # Minimum seconds between posts
     CommentListNum: 10
-    CommentInterval: 20
+    CommentInterval: 20                        # Minimum seconds between comments
     Authorized: false
-    RegReview: false
-    CloseReg: false
+    RegReview: false                           # Whether new registrations require manual approval
+    CloseReg: false                            # Completely close registration
     AutoDataBackup: false
     AutoGetTag: true
     TrackingCodeID: ""
     GithubClientID: ""
     GithubClientSecret: ""
-    UploadSuffix: ""
-    UploadImgOnly: false
-    UploadImgResize: false
-    UploadMaxSize: 50
-
+    UploadSuffix: ""                           # Allowed upload file extensions (empty = no restriction)
+    UploadImgOnly: false                       # Only allow image uploads
+    UploadImgResize: false                     # Automatically resize uploaded images
+    UploadMaxSize: 50                          # Maximum upload size in MB
